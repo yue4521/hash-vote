@@ -37,7 +37,7 @@ pip install -r requirements.txt
 ### 2. アプリケーションの起動
 
 ```bash
-python -m uvicorn hashvote.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
 
 サーバーが起動したら、以下のURLでアクセス可能になります：
@@ -76,7 +76,7 @@ curl -X POST "http://localhost:8000/vote" \
 クライアント側でnonce計算を実行：
 
 ```python
-from hashvote.pow import compute_nonce
+from app.pow import compute_nonce
 from datetime import datetime
 
 # 段階1で取得したprev_hashを使用
@@ -154,7 +154,7 @@ curl "http://localhost:8000/poll/election_2024/audit"
 pytest
 
 # カバレッジ付きテスト
-pytest --cov=hashvote
+pytest --cov=app
 
 # 特定テストファイル実行
 pytest tests/test_pow.py
@@ -210,7 +210,7 @@ block_hash = SHA-256(poll_id + voter_hash + choice + timestamp + prev_hash + non
 
 ```
 hash-vote/
-├── hashvote/
+├── app/
 │   ├── __init__.py
 │   ├── main.py          # FastAPIアプリケーション
 │   ├── models.py        # データモデル定義

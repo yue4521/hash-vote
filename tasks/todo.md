@@ -6,7 +6,7 @@ Proof-of-Work（PoW）ベースの投票システム「HashVote」の初期コ�
 ## 実装したToDoリスト
 
 ### ✅ 1. プロジェクト基盤構築
-- [x] ディレクトリ構造作成（hashvote/, tests/）
+- [x] ディレクトリ構造作成（app/, tests/）
 - [x] requirements.txt作成（FastAPI、SQLModel、uvicorn、pytest等）
 - [x] .gitignore作成（Python標準 + SQLiteファイル）
 - [x] __init__.py ファイル作成
@@ -103,7 +103,7 @@ Proof-of-Work（PoW）ベースの投票システム「HashVote」の初期コ�
 ### プロジェクト構成
 ```
 hash-vote/
-├── hashvote/          # メインアプリケーション
+├── app/          # メインアプリケーション
 ├── tests/             # テストスイート  
 ├── requirements.txt   # Python依存関係
 ├── README.md         # 使用方法とドキュメント
@@ -113,7 +113,7 @@ hash-vote/
 ### 実行コマンド
 ```bash
 # サーバー起動
-python -m uvicorn hashvote.main:app --reload
+python -m uvicorn app.main:app --reload
 
 # テスト実行  
 pytest tests/ -v

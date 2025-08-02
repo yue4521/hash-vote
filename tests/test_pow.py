@@ -3,7 +3,7 @@ Unit tests for proof-of-work functionality.
 """
 import pytest
 from datetime import datetime
-from hashvote.pow import hash_block, compute_nonce, verify_pow, get_difficulty_target
+from app.pow import hash_block, compute_nonce, verify_pow, get_difficulty_target
 
 
 class TestHashBlock:

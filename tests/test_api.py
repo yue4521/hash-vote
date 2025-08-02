@@ -5,9 +5,9 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
-from hashvote.main import app, get_session
-from hashvote.models import Block
-from hashvote.pow import compute_nonce
+from app.main import app, get_session
+from app.models import Block
+from app.pow import compute_nonce
 from datetime import datetime
 
 
@@ -59,7 +59,7 @@ class TestVoteEndpoint:
     
     def test_vote_full_submission(self, client: TestClient):
         """Test complete vote submission (phase 1 + 2)."""
-        from hashvote.pow import compute_nonce
+        from app.pow import compute_nonce
         from datetime import datetime
         import time
         
@@ -159,7 +159,7 @@ class TestPollResultEndpoint:
     
     def test_poll_result_with_votes(self, client: TestClient, session: Session):
         """Test poll result with votes."""
-        from hashvote.pow import hash_block, compute_nonce
+        from app.pow import hash_block, compute_nonce
         
         # Add test votes to database
         timestamp = datetime.utcnow()
@@ -229,7 +229,7 @@ class TestPollAuditEndpoint:
     
     def test_poll_audit_with_blocks(self, client: TestClient, session: Session):
         """Test audit trail with blocks."""
-        from hashvote.pow import hash_block, compute_nonce
+        from app.pow import hash_block, compute_nonce
         
         # Add test blocks to database
         timestamp = datetime.utcnow()
