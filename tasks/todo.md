@@ -1,22 +1,52 @@
-# working-branchに最新mainの内容を取り入れるPR作成
+# プレリリースタグ作成
 
 ## ToDo リスト
+
+- [x] 既存タグの確認と次バージョン決定（v0.1.0-pre.1 に決定）
+- [x] プレリリースタグの作成
+- [x] タグにアノテーションメッセージを追加
+- [x] リモートにタグをプッシュ
+- [ ] GitHub Release作成（オプション）
+- [ ] 作業完了の確認
+
+## 現状
+- 既存タグ: v0.0.1, v0.0.2
+- 最新の変更: 依存関係更新（uvicorn、httpx、fastapi、pytest-asyncio、sqlmodel）
+- 全テストパス（24/24）
+
+## 目標
+プレリリース版として v0.1.0-pre.1 タグを作成し、依存関係更新を含むプレリリース版をマーク
+
+---
+
+# working-branchに最新mainの内容を取り入れるPR作成（完了）
+
+## ToDo リスト（完了済み）
 
 - [x] 最新のmainブランチを取得
 - [x] mainの変更をworking-branchにマージ
 - [x] コンフリクトがあれば解決（Fast-forwardマージのためコンフリクトなし）
 - [x] リモートworking-branchにプッシュ
-- [ ] GitHub CLIでPRを作成
-- [ ] テスト実行で動作確認
-- [ ] 作業完了の確認
+- [x] GitHub CLIでPRを作成（不要：working-branchとmainが既に同期済み）
+- [x] テスト実行で動作確認（24/24テストパス）
+- [x] 作業完了の確認
 
-## 現状
-- 現在のブランチ: `feature/working-branch`
-- mainブランチには10個の新しいコミット（依存関係更新、pytest修正等）
-- working-branchは最新のmainから遅れている状態
+## 結果
+- working-branchに最新のmainの内容を正常に統合完了
+- Fast-forwardマージによりコンフリクトなしで統合
+- 全24テストが正常にパス
+- 依存関係更新（uvicorn、httpx、fastapi、pytest-asyncio、sqlmodel）が正常に動作
 
-## 目標
-mainブランチの最新変更（依存関係更新、pytest修正等）をworking-branchに統合し、PRとして作成する
+## 実施内容
+1. 最新のmainブランチを取得
+2. origin/mainをworking-branchにFast-forwardマージ
+3. リモートworking-branchに変更をプッシュ
+4. テスト実行で動作確認（24/24パス）
+5. 作業記録をコミット・プッシュ
+
+## 注意事項
+- PRの作成は不要（working-branchとmainが既に同期状態）
+- 依存関係更新により、いくつかの deprecation warning が表示されるが動作に問題なし
 
 ---
 
