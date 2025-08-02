@@ -210,20 +210,28 @@ block_hash = SHA-256(poll_id + voter_hash + choice + timestamp + prev_hash + non
 
 ```
 hash-vote/
-├── app/
+├── app/                 # メインアプリケーション
 │   ├── __init__.py
 │   ├── main.py          # FastAPIアプリケーション
 │   ├── models.py        # データモデル定義
 │   ├── pow.py           # Proof-of-Work実装
-│   └── database.py      # データベース設定
-├── tests/
+│   ├── database.py      # データベース設定
+│   └── README.md        # アプリケーション実装詳細
+├── tests/               # テストスイート
 │   ├── __init__.py
 │   ├── test_pow.py      # PoW機能テスト
-│   └── test_api.py      # API機能テスト
+│   ├── test_api.py      # API機能テスト
+│   └── README.md        # テスト仕様と実行方法
+├── tasks/               # 開発タスク管理
+│   └── todo.md          # 実装計画とタスクリスト
 ├── requirements.txt     # Python依存関係
-├── README.md           # このファイル
+├── README.md           # このファイル（概要とセットアップ）
 └── .gitignore          # Git除外設定
 ```
+
+**詳細ドキュメント:**
+- [app/README.md](app/README.md) - アプリケーションアーキテクチャと実装詳細
+- [tests/README.md](tests/README.md) - テスト構成と実行方法詳細
 
 ## ライセンス
 
