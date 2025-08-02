@@ -1,5 +1,10 @@
 # HashVote - Proof-of-Work投票システム
 
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green.svg)](https://fastapi.tiangolo.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 HashVoteは、ブロックチェーン技術とProof-of-Work（PoW）アルゴリズムを使用した分散型投票システムです。各投票は暗号学的に検証可能なブロックとして記録され、改ざん耐性のある投票記録を実現します。
 
 ## 特徴
