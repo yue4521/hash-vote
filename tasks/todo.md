@@ -1,3 +1,25 @@
+# working-branchに最新mainの内容を取り入れるPR作成
+
+## ToDo リスト
+
+- [x] 最新のmainブランチを取得
+- [x] mainの変更をworking-branchにマージ
+- [x] コンフリクトがあれば解決（Fast-forwardマージのためコンフリクトなし）
+- [x] リモートworking-branchにプッシュ
+- [ ] GitHub CLIでPRを作成
+- [ ] テスト実行で動作確認
+- [ ] 作業完了の確認
+
+## 現状
+- 現在のブランチ: `feature/working-branch`
+- mainブランチには10個の新しいコミット（依存関係更新、pytest修正等）
+- working-branchは最新のmainから遅れている状態
+
+## 目標
+mainブランチの最新変更（依存関係更新、pytest修正等）をworking-branchに統合し、PRとして作成する
+
+---
+
 # HashVote プロジェクト実装計画
 
 ## プロジェクト概要
