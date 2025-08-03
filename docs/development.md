@@ -6,7 +6,7 @@
 hash-vote/
 ├── app/                 # メインアプリケーション
 │   ├── __init__.py
-│   ├── main.py          # FastAPIアプリケーション
+│   ├── cli.py           # コンソールアプリケーション
 │   ├── models.py        # データモデル定義
 │   ├── pow.py           # Proof-of-Work実装
 │   ├── database.py      # データベース設定
@@ -14,14 +14,14 @@ hash-vote/
 ├── tests/               # テストスイート
 │   ├── __init__.py
 │   ├── test_pow.py      # PoW機能テスト
-│   ├── test_api.py      # API機能テスト
+│   ├── test_cli.py      # CLI機能テスト
 │   └── README.md        # テスト概要
 ├── docs/                # ドキュメント
-│   ├── api-usage.md     # API使用方法詳細
 │   ├── technical-specs.md # 技術仕様
 │   ├── security.md      # セキュリティ考慮事項
 │   ├── testing.md       # テスト詳細仕様
 │   └── development.md   # このファイル
+├── console_main.py      # CLIエントリーポイント
 ├── tasks/               # 開発タスク管理
 │   └── todo.md          # 実装計画とタスクリスト
 ├── requirements.txt     # Python依存関係
@@ -35,7 +35,7 @@ HashVoteは以下の層構造で設計されたProof-of-Work投票システム�
 
 ```
 ┌─────────────────┐
-│   FastAPI       │  ← API層（main.py）
+│   CLI           │  ← CLI層（cli.py）
 ├─────────────────┤
 │   Models        │  ← データモデル（models.py）
 ├─────────────────┤
@@ -45,21 +45,23 @@ HashVoteは以下の層構造で設計されたProof-of-Work投票システム�
 └─────────────────┘
 ```
 
-### `main.py` - FastAPIアプリケーション
+### `cli.py` - コンソールアプリケーション
 
-メインのAPIアプリケーションファイル。すべてのエンドポイントとビジネスロジックを実装。
+メニュー駆動のコンソールインターフェース。すべての投票機能をコンソール上で提供。
 
 **主要な機能:**
-- **2段階投票プロセス**: 初回リクエスト → PoW計算 → 最終提出
-- **チェーン整合性検証**: ブロックチェーンの暗号学的整合性をリアルタイムで検証
-- **重複投票防止**: データベース制約による確実な一意性保証
-- **エラーハンドリング**: 適切なHTTPステータスコードと詳細エラーメッセージ
+- **メニュー駆動操作**: 1-5の数字選択による直感的な操作
+- **投票処理**: PoW計算込みの完全な投票プロセス
+- **結果表示**: 投票結果の集計と表示
+- **監査機能**: 全ブロックの詳細情報表示
+- **ヘルスチェック**: システム状態確認
 
-**API エンドポイント:**
-- `POST /vote` - 投票の提出（2段階プロセス）
-- `GET /poll/{poll_id}/result` - 投票結果の集計
-- `GET /poll/{poll_id}/audit` - 監査証跡の取得
-- `GET /health` - ヘルスチェック
+**CLI機能:**
+- `1. 投票する` - 投票ID、選択肢、投票者IDを入力して投票
+- `2. 投票結果を確認する` - 投票IDを入力して結果表示
+- `3. 監査ログを確認する` - 全ブロックの詳細情報表示
+- `4. ヘルスチェック` - システム状態確認
+- `5. 終了` - アプリケーション終了
 
 ### `models.py` - データモデル
 
@@ -69,8 +71,7 @@ SQLModelを使用したタイプセーフなデータモデル定義。
 - **`Block`**: 投票ブロックの永続化モデル
   - 複合UNIQUE制約（poll_id + voter_hash）による重複防止
   - インデックス最適化されたクエリサポート
-- **`VoteRequest`/`VoteSubmission`**: リクエストバリデーション
-- **`VoteResponse`/`PollResult`/`AuditResponse`**: レスポンス形式
+  - CLI機能で直接使用される唯一のモデル
 
 **データベース制約:**
 ```sql
@@ -108,7 +109,7 @@ SQLiteデータベースの接続管理と設定。
 
 **主要な機能:**
 - **SQLite設定**: スレッドセーフ接続とパフォーマンス最適化
-- **セッション管理**: FastAPIの依存性注入システムと統合
+- **セッション管理**: CLI機能との直接統合
 - **テーブル初期化**: アプリケーション起動時の自動スキーマ作成
 
 **設定:**
@@ -120,19 +121,19 @@ echo = False              # 本番環境用設定
 
 ## 開発作業フロー
 
-### 新しいAPIエンドポイントの追加
+### 新しいCLI機能の追加
 
-1. **models.py**でリクエスト/レスポンスモデルを定義
-2. **main.py**でエンドポイント関数を実装
-3. **database.py**の依存性注入を使用してデータベースアクセス
-4. 適切なHTTPステータスコードとエラーハンドリングを実装
+1. **cli.py**のHashVoteCLIクラスに新しいメソッドを追加
+2. **display_menu()**でメニュー項目を追加
+3. **run()**メソッドで選択肢処理を追加
+4. 適切なエラーハンドリングとユーザー体験を実装
 
 例:
 ```python
-@app.get("/new-endpoint", response_model=ResponseModel)
-async def new_endpoint(session: Session = Depends(get_session)):
-    # ビジネスロジック実装
-    return ResponseModel(...)
+def handle_new_feature(self):
+    print("\n--- 新機能 ---")
+    # 機能実装
+    input("\nEnterキーを押して続行...")
 ```
 
 ### データモデルの変更
@@ -169,7 +170,7 @@ nonce = compute_nonce(..., difficulty_bits=difficulty, timeout=300)
 
 **現在の実装:**
 - データベースインデックス（poll_id, block_hash）
-- 非同期API（FastAPI）
+- 同期処理によるシンプルなCLI操作
 - SQLiteの最適化設定
 
 **スケールアップ時の検討事項:**
@@ -188,7 +189,7 @@ pytest --cov=app
 
 # 特定テストファイル実行
 pytest tests/test_pow.py
-pytest tests/test_api.py
+pytest tests/test_cli.py
 ```
 
 ## 開発・貢献
@@ -205,7 +206,6 @@ pytest tests/test_api.py
 
 ## 関連ドキュメント
 
-- [API使用方法](api-usage.md)
 - [詳細なテスト仕様](testing.md)
 - [セキュリティ考慮事項](security.md)
 - [技術仕様](technical-specs.md)
