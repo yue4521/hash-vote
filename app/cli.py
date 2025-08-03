@@ -24,6 +24,7 @@ from rich.rule import Rule
 from .models import Block
 from .database import create_db_and_tables, get_session_direct
 from .pow import compute_nonce, verify_pow, hash_block, get_difficulty_target
+from .sql_functions import get_sql_manager
 
 
 class HashVoteCLI:
@@ -76,8 +77,9 @@ class HashVoteCLI:
             ("1", "🗳️", "投票する"),
             ("2", "📊", "投票結果を確認する"),
             ("3", "🔍", "監査ログを確認する"),
-            ("4", "💚", "ヘルスチェック"),
-            ("5", "👋", "終了")
+            ("4", "🗄️", "データベース管理"),
+            ("5", "💚", "ヘルスチェック"),
+            ("6", "👋", "終了")
         ]
         
         for num, icon, desc in menu_items:
@@ -405,6 +407,305 @@ class HashVoteCLI:
             )
             self.console.print(error_panel)
     
+    def handle_database_management(self):
+        """Handle database management menu."""
+        self.console.rule("[bold magenta]🗄️ データベース管理[/bold magenta]")
+        
+        # Database management submenu
+        db_menu_table = Table(show_header=False, box=box.SIMPLE_HEAD, border_style="magenta")
+        db_menu_table.add_column("番号", style="cyan bold", width=4)
+        db_menu_table.add_column("アイコン", width=4)
+        db_menu_table.add_column("機能", style="white")
+        
+        db_menu_items = [
+            ("1", "🔄", "データベース初期化"),
+            ("2", "📊", "データベース統計"),
+            ("3", "🔍", "SQLクエリ実行"),
+            ("4", "💾", "データベースバックアップ"),
+            ("5", "🔧", "整合性チェック"),
+            ("6", "📈", "詳細統計"),
+            ("7", "↩️", "メインメニューに戻る")
+        ]
+        
+        for num, icon, desc in db_menu_items:
+            db_menu_table.add_row(num, icon, desc)
+        
+        db_menu_panel = Panel(
+            db_menu_table,
+            title="🗄️ データベース管理メニュー",
+            title_align="left",
+            border_style="magenta",
+            padding=(1, 2)
+        )
+        
+        self.console.print(db_menu_panel)
+        
+        choice = self.get_user_input("機能を選択してください (1-7)")
+        
+        try:
+            sql_manager = get_sql_manager()
+            
+            if choice == "1":
+                self.handle_db_init(sql_manager)
+            elif choice == "2":
+                self.handle_db_stats(sql_manager)
+            elif choice == "3":
+                self.handle_sql_query(sql_manager)
+            elif choice == "4":
+                self.handle_db_backup(sql_manager)
+            elif choice == "5":
+                self.handle_integrity_check(sql_manager)
+            elif choice == "6":
+                self.handle_detailed_stats(sql_manager)
+            elif choice == "7":
+                return
+            else:
+                self.console.print("[red]❌ 無効な選択です。1-7の数字を入力してください。[/red]")
+        
+        except Exception as e:
+            error_panel = Panel(
+                f"❌ エラー: {str(e)}",
+                title="[red]データベース操作エラー[/red]",
+                border_style="red"
+            )
+            self.console.print(error_panel)
+    
+    def handle_db_init(self, sql_manager):
+        """Handle database initialization."""
+        self.console.print("\n[yellow]⚠️ 警告: この操作はすべてのデータを削除します![/yellow]")
+        confirm = self.get_user_input("本当に初期化しますか？ (yes/no)")
+        
+        if confirm.lower() == 'yes':
+            try:
+                sql_manager.init_database()
+                success_panel = Panel(
+                    "✅ データベースの初期化が完了しました\n🔄 すべてのテーブルが再作成されました",
+                    title="[green]初期化完了[/green]",
+                    border_style="green"
+                )
+                self.console.print(success_panel)
+            except Exception as e:
+                self.console.print(f"[red]❌ 初期化エラー: {str(e)}[/red]")
+        else:
+            self.console.print("[cyan]初期化をキャンセルしました。[/cyan]")
+    
+    def handle_db_stats(self, sql_manager):
+        """Handle database statistics display."""
+        stats = sql_manager.get_database_stats()
+        
+        stats_table = Table(title="📊 データベース統計", box=box.ROUNDED)
+        stats_table.add_column("項目", style="cyan bold")
+        stats_table.add_column("値", style="white")
+        
+        stats_table.add_row("ファイルサイズ", f"{stats['file_size_mb']} MB")
+        
+        for table, count in stats['table_counts'].items():
+            stats_table.add_row(f"{table} テーブル", f"{count} レコード")
+        
+        if 'top_polls' in stats and stats['top_polls']:
+            top_poll = stats['top_polls'][0]
+            stats_table.add_row("最多投票ID", f"{top_poll['poll_id']} ({top_poll['vote_count']} 票)")
+        
+        if 'latest_vote' in stats and stats['latest_vote']:
+            latest = stats['latest_vote']
+            stats_table.add_row("最新投票", f"{latest['poll_id']} - {latest['choice']}")
+        
+        self.console.print(stats_table)
+    
+    def handle_sql_query(self, sql_manager):
+        """Handle SQL query execution."""
+        self.console.print("\n[cyan]💡 SQLクエリを入力してください（複数行可、空行で実行）[/cyan]")
+        self.console.print("[dim]例: SELECT COUNT(*) FROM blocks;[/dim]")
+        
+        query_lines = []
+        while True:
+            line = input("> ").strip()
+            if not line:
+                break
+            query_lines.append(line)
+        
+        if not query_lines:
+            self.console.print("[yellow]クエリが入力されませんでした。[/yellow]")
+            return
+        
+        query = " ".join(query_lines)
+        
+        try:
+            results = sql_manager.execute_query(query)
+            
+            if results:
+                if len(results) > 0:
+                    # Create table for results
+                    result_table = Table(title="📋 クエリ結果", box=box.ROUNDED)
+                    
+                    # Add columns
+                    if results:
+                        for key in results[0].keys():
+                            result_table.add_column(key, style="white")
+                        
+                        # Add rows (limit to first 50 for display)
+                        for row in results[:50]:
+                            result_table.add_row(*[str(value) for value in row.values()])
+                    
+                    self.console.print(result_table)
+                    
+                    if len(results) > 50:
+                        self.console.print(f"[yellow]⚠️ 結果が50行を超えるため、最初の50行のみ表示しています。（全{len(results)}行）[/yellow]")
+                else:
+                    self.console.print("[green]✅ クエリが正常に実行されました（結果なし）[/green]")
+            else:
+                self.console.print("[green]✅ クエリが正常に実行されました[/green]")
+        
+        except Exception as e:
+            self.console.print(f"[red]❌ クエリエラー: {str(e)}[/red]")
+    
+    def handle_db_backup(self, sql_manager):
+        """Handle database backup."""
+        try:
+            backup_path = sql_manager.backup_database()
+            success_panel = Panel(
+                f"✅ バックアップが作成されました\n📁 保存先: {backup_path}",
+                title="[green]バックアップ完了[/green]",
+                border_style="green"
+            )
+            self.console.print(success_panel)
+        except Exception as e:
+            self.console.print(f"[red]❌ バックアップエラー: {str(e)}[/red]")
+    
+    def handle_integrity_check(self, sql_manager):
+        """Handle blockchain integrity check."""
+        try:
+            is_valid, errors = sql_manager.verify_blockchain_integrity()
+            
+            if is_valid:
+                success_panel = Panel(
+                    "✅ ブロックチェーンの整合性に問題はありません\n🔐 すべてのハッシュが正しく連鎖しています",
+                    title="[green]整合性チェック完了[/green]",
+                    border_style="green"
+                )
+                self.console.print(success_panel)
+            else:
+                error_table = Table(title="❌ 整合性エラー", box=box.ROUNDED)
+                error_table.add_column("エラー", style="red")
+                
+                for error in errors:
+                    error_table.add_row(error)
+                
+                self.console.print(error_table)
+        
+        except Exception as e:
+            self.console.print(f"[red]❌ 整合性チェックエラー: {str(e)}[/red]")
+    
+    def handle_detailed_stats(self, sql_manager):
+        """Handle detailed statistics display."""
+        self.console.print("\n[cyan]詳細統計の種類を選択してください：[/cyan]")
+        
+        stats_options = [
+            ("1", "📊", "全体統計"),
+            ("2", "🗳️", "投票ID別統計"),
+            ("3", "👤", "投票者行動分析")
+        ]
+        
+        for num, icon, desc in stats_options:
+            self.console.print(f"[cyan]{num}[/cyan] {icon} {desc}")
+        
+        choice = self.get_user_input("選択してください (1-3)")
+        
+        try:
+            if choice == "1":
+                stats = sql_manager.get_vote_statistics()
+                self._display_general_stats(stats)
+            elif choice == "2":
+                poll_id = self.get_user_input("投票ID（空白で全体統計）")
+                poll_id = poll_id if poll_id else None
+                stats = sql_manager.get_vote_statistics(poll_id)
+                self._display_poll_stats(stats, poll_id)
+            elif choice == "3":
+                self._display_voter_behavior_stats(sql_manager)
+            else:
+                self.console.print("[red]❌ 無効な選択です。[/red]")
+        
+        except Exception as e:
+            self.console.print(f"[red]❌ 統計エラー: {str(e)}[/red]")
+    
+    def _display_general_stats(self, stats):
+        """Display general statistics."""
+        general_table = Table(title="📊 全体統計", box=box.ROUNDED)
+        general_table.add_column("項目", style="cyan bold")
+        general_table.add_column("値", style="white")
+        
+        general_table.add_row("総投票数", str(stats['total_votes']))
+        
+        if stats['choice_distribution']:
+            choice_table = Table(title="🗳️ 選択肢別分布", box=box.ROUNDED)
+            choice_table.add_column("選択肢", style="cyan")
+            choice_table.add_column("投票数", style="white")
+            choice_table.add_column("割合", style="green")
+            
+            for choice_data in stats['choice_distribution']:
+                choice_table.add_row(
+                    choice_data['choice'],
+                    str(choice_data['count']),
+                    f"{choice_data['percentage']}%"
+                )
+            
+            self.console.print(choice_table)
+        
+        self.console.print(general_table)
+    
+    def _display_poll_stats(self, stats, poll_id):
+        """Display poll-specific statistics."""
+        title = f"📊 投票統計 - {poll_id}" if poll_id else "📊 全体投票統計"
+        
+        if stats['choice_distribution']:
+            choice_table = Table(title=title, box=box.ROUNDED)
+            choice_table.add_column("選択肢", style="cyan")
+            choice_table.add_column("投票数", style="white")
+            choice_table.add_column("割合", style="green")
+            
+            for choice_data in stats['choice_distribution']:
+                choice_table.add_row(
+                    choice_data['choice'],
+                    str(choice_data['count']),
+                    f"{choice_data['percentage']}%"
+                )
+            
+            self.console.print(choice_table)
+    
+    def _display_voter_behavior_stats(self, sql_manager):
+        """Display voter behavior statistics."""
+        query = """
+        SELECT 
+            COUNT(DISTINCT poll_id) as polls_participated,
+            COUNT(*) as voter_count
+        FROM (
+            SELECT voter_hash, COUNT(DISTINCT poll_id) as polls_per_voter
+            FROM blocks 
+            GROUP BY voter_hash
+        ) subq
+        GROUP BY polls_participated
+        ORDER BY polls_participated
+        """
+        
+        try:
+            results = sql_manager.execute_query(query)
+            
+            if results:
+                behavior_table = Table(title="👤 投票者行動分析", box=box.ROUNDED)
+                behavior_table.add_column("参加投票数", style="cyan")
+                behavior_table.add_column("投票者数", style="white")
+                
+                for row in results:
+                    behavior_table.add_row(
+                        str(row['polls_participated']),
+                        str(row['voter_count'])
+                    )
+                
+                self.console.print(behavior_table)
+        
+        except Exception as e:
+            self.console.print(f"[red]❌ 行動分析エラー: {str(e)}[/red]")
+    
     def run(self):
         """Run the CLI application."""
         try:
@@ -413,7 +714,7 @@ class HashVoteCLI:
                 self.display_header()
                 self.display_menu()
                 
-                choice = self.get_user_input("選択してください (1-5)")
+                choice = self.get_user_input("選択してください (1-6)")
                 
                 if choice == "1":
                     self.handle_vote()
@@ -422,8 +723,10 @@ class HashVoteCLI:
                 elif choice == "3":
                     self.handle_audit_log()
                 elif choice == "4":
-                    self.handle_health_check()
+                    self.handle_database_management()
                 elif choice == "5":
+                    self.handle_health_check()
+                elif choice == "6":
                     goodbye_panel = Panel(
                         "[bold cyan]👋 HashVoteを終了します。ありがとうございました![/bold cyan]",
                         border_style="cyan"
@@ -431,9 +734,9 @@ class HashVoteCLI:
                     self.console.print(goodbye_panel)
                     break
                 else:
-                    self.console.print("[red]❌ 無効な選択です。1-5の数字を入力してください。[/red]")
+                    self.console.print("[red]❌ 無効な選択です。1-6の数字を入力してください。[/red]")
                 
-                if choice != "5":
+                if choice != "6":
                     self.console.print("\n[dim]Enterキーを押して続行...[/dim]")
                     input()
         
