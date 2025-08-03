@@ -2,7 +2,7 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, test/workflow]
   pull_request:
   schedule:
     - cron: '0 3 * * 0'   # UTC 日曜 12:00 JST
