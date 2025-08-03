@@ -13,7 +13,7 @@
 - [x] docs/technical-specs.mdからFastAPI/Uvicorn関連技術仕様を削除
 - [x] tasks/todo.mdにWebAPI機能削除完了タスクセクションを追加
 - [x] 修正後にCLI/PoWテストを実行して動作確認
-- [ ] 変更をコミットしてプッシュ
+- [x] 変更をコミットしてプッシュ
 
 ## 概要
 HashVoteシステムからWebAPI機能を完全に削除し、CLI専用の投票システムに変更
