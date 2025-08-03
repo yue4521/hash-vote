@@ -1,5 +1,6 @@
 version: 2
 updates:
+  # Root directory Python packages
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -15,9 +16,21 @@ updates:
     commit-message:
       prefix: "deps"
       include: "scope"
-    ignore:
-      # Ignore major version updates for core dependencies to avoid breaking changes
-      - dependency-name: "sqlmodel"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "uvicorn"
-        update-types: ["version-update:semver-major"]
+    labels:
+      - "dependencies"
+      - "python"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
