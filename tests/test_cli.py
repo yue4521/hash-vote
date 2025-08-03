@@ -5,7 +5,7 @@ import pytest
 import io
 import sys
 from unittest.mock import patch, Mock
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
@@ -53,7 +53,7 @@ class TestHashVoteCLI:
     def test_get_latest_block_hash_with_blocks(self, cli_app: HashVoteCLI):
         """Test getting latest block hash with existing blocks."""
         # Add a test block
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         block = Block(
             poll_id="test_poll",
             voter_hash="test_voter",
@@ -77,7 +77,7 @@ class TestHashVoteCLI:
     def test_check_duplicate_vote_with_duplicate(self, cli_app: HashVoteCLI):
         """Test duplicate vote check when duplicate exists."""
         # Add a test block
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         block = Block(
             poll_id="test_poll",
             voter_hash="test_voter",
@@ -167,7 +167,7 @@ class TestCLIVoteHandling:
     def test_handle_vote_duplicate(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
         """Test vote handling with duplicate voter."""
         # Add existing vote
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         import hashlib
         voter_hash = hashlib.sha256("voter1".encode('utf-8')).hexdigest()
         
@@ -210,7 +210,7 @@ class TestCLIPollResults:
     def test_handle_poll_result_with_votes(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
         """Test poll result handling with votes."""
         # Add test votes
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         votes = [
             ("voter1", "option_a"),
             ("voter2", "option_a"),
@@ -260,7 +260,7 @@ class TestCLIAuditLog:
     def test_handle_audit_log_with_blocks(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
         """Test audit log handling with blocks."""
         # Add test blocks
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         blocks_data = [
             ("voter1", "option_a"),
             ("voter2", "option_b"),

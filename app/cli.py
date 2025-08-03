@@ -6,7 +6,7 @@ A console-based interface for the proof-of-work voting system.
 import hashlib
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
 from sqlmodel import Session, select
@@ -103,7 +103,7 @@ class HashVoteCLI:
         
         # Get previous hash
         prev_hash = self.get_latest_block_hash(poll_id)
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(timezone.utc)
         
         # Display proof of work information
         difficulty_target = get_difficulty_target()
@@ -234,7 +234,7 @@ class HashVoteCLI:
             print("✅ システム正常")
             print(f"データベース接続: OK")
             print(f"総ブロック数: {len(all_blocks)}")
-            print(f"現在時刻: {datetime.utcnow().isoformat()}")
+            print(f"現在時刻: {datetime.now(timezone.utc).isoformat()}")
             print(f"バージョン: 1.0.0-CLI")
             
         except Exception as e:

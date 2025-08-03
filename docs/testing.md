@@ -169,7 +169,7 @@ def test_with_existing_data(self, session: Session):
         poll_id="test_poll",
         voter_hash="test_voter",
         choice="test_choice",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         prev_hash="0" * 64,
         nonce=12345,
         block_hash="test_hash"

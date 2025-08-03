@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/yourusername/hash-vote/releases)
 
 ブロックチェーン技術とProof-of-Work（PoW）アルゴリズムを使用した分散型投票システム。各投票は暗号学的に検証可能なブロックとして記録され、改ざん耐性のある投票記録を実現します。
 
