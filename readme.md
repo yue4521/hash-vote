@@ -1,6 +1,7 @@
 # HashVote - Proof-of-Work投票システム
 
 [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python)](https://www.python.org/)
+[![SQLModel](https://img.shields.io/badge/SQLModel-0.0.24-4479A1?logo=sqlite)](https://sqlmodel.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://github.com/yue4521/hash-vote/releases)
 
