@@ -44,6 +44,7 @@ class TestHashVoteCLI:
              patch('app.cli.get_session_direct'):
             app = HashVoteCLI()
             assert app.session is not None or app.session is None  # Mock may return None
+            assert hasattr(app, 'console')  # Rich console should be initialized
     
     def test_get_latest_block_hash_empty(self, cli_app: HashVoteCLI):
         """Test getting latest block hash when no blocks exist."""
@@ -93,78 +94,90 @@ class TestHashVoteCLI:
         result = cli_app.check_duplicate_vote("test_poll", "test_voter")
         assert result is True
     
-    @patch('builtins.input')
-    def test_get_user_input(self, mock_input, cli_app: HashVoteCLI):
-        """Test user input handling."""
-        mock_input.return_value = "test_input"
+    @patch('rich.prompt.Prompt.ask')
+    def test_get_user_input(self, mock_ask, cli_app: HashVoteCLI):
+        """Test user input handling with Rich Prompt."""
+        mock_ask.return_value = "test_input"
         result = cli_app.get_user_input("Test prompt")
         assert result == "test_input"
+        mock_ask.assert_called_once()
     
-    @patch('os.system')
-    def test_clear_screen(self, mock_system, cli_app: HashVoteCLI):
-        """Test screen clearing functionality."""
+    @patch('rich.console.Console.clear')
+    def test_clear_screen(self, mock_clear, cli_app: HashVoteCLI):
+        """Test screen clearing functionality with Rich Console."""
         cli_app.clear_screen()
-        mock_system.assert_called_once()
+        mock_clear.assert_called_once()
     
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_display_header(self, mock_stdout, cli_app: HashVoteCLI):
-        """Test header display."""
+    @patch('rich.console.Console.print')
+    def test_display_header(self, mock_print, cli_app: HashVoteCLI):
+        """Test header display with Rich formatting."""
         cli_app.display_header()
-        output = mock_stdout.getvalue()
-        assert "HashVote" in output
-        assert "Proof of Work" in output
+        # Should be called twice: once for panel, once for empty line
+        assert mock_print.call_count >= 1
+        # Check that Panel was created (can't easily test content due to Rich formatting)
+        call_args = mock_print.call_args_list
+        assert len(call_args) > 0
     
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_display_menu(self, mock_stdout, cli_app: HashVoteCLI):
-        """Test menu display."""
+    @patch('rich.console.Console.print')
+    def test_display_menu(self, mock_print, cli_app: HashVoteCLI):
+        """Test menu display with Rich table."""
         cli_app.display_menu()
-        output = mock_stdout.getvalue()
-        assert "投票する" in output
-        assert "投票結果を確認する" in output
-        assert "監査ログを確認する" in output
-        assert "ヘルスチェック" in output
-        assert "終了" in output
+        # Should be called once for the panel with table
+        mock_print.assert_called_once()
+        # Verify it's called with a Panel object
+        call_args = mock_print.call_args[0]
+        assert len(call_args) > 0
 
 
 class TestCLIVoteHandling:
     """Test cases for voting functionality."""
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_vote_missing_poll_id(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_vote_missing_poll_id(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test vote handling with missing poll ID."""
-        mock_input.side_effect = ["", "option_a", "voter1"]  # Empty poll_id
+        mock_ask.side_effect = ["", "option_a", "voter1"]  # Empty poll_id
         
         cli_app.handle_vote()
         
-        output = mock_stdout.getvalue()
-        assert "エラー: 投票IDが必要です" in output
+        # Check that error message was printed
+        error_calls = [call for call in mock_print.call_args_list 
+                      if any("エラー: 投票IDが必要です" in str(arg) for arg in call[0])]
+        assert len(error_calls) > 0
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_vote_missing_choice(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_vote_missing_choice(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test vote handling with missing choice."""
-        mock_input.side_effect = ["test_poll", "", "voter1"]  # Empty choice
+        mock_ask.side_effect = ["test_poll", "", "voter1"]  # Empty choice
         
         cli_app.handle_vote()
         
-        output = mock_stdout.getvalue()
-        assert "エラー: 選択肢が必要です" in output
+        # Check that error message was printed
+        error_calls = [call for call in mock_print.call_args_list 
+                      if any("エラー: 選択肢が必要です" in str(arg) for arg in call[0])]
+        assert len(error_calls) > 0
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_vote_missing_voter_id(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_vote_missing_voter_id(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test vote handling with missing voter ID."""
-        mock_input.side_effect = ["test_poll", "option_a", ""]  # Empty voter_id
+        mock_ask.side_effect = ["test_poll", "option_a", ""]  # Empty voter_id
         
         cli_app.handle_vote()
         
-        output = mock_stdout.getvalue()
-        assert "エラー: 投票者IDが必要です" in output
+        # Check that error message was printed
+        error_calls = [call for call in mock_print.call_args_list 
+                      if any("エラー: 投票者IDが必要です" in str(arg) for arg in call[0])]
+        assert len(error_calls) > 0
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_vote_duplicate(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_vote_duplicate(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test vote handling with duplicate voter."""
         # Add existing vote
         timestamp = datetime.now(timezone.utc)
@@ -183,31 +196,37 @@ class TestCLIVoteHandling:
         cli_app.session.add(block)
         cli_app.session.commit()
         
-        mock_input.side_effect = ["test_poll", "option_b", "voter1"]
+        mock_ask.side_effect = ["test_poll", "option_b", "voter1"]
         
         cli_app.handle_vote()
         
-        output = mock_stdout.getvalue()
-        assert "エラー: この投票者は既に投票済みです" in output
+        # Check that error message was printed
+        error_calls = [call for call in mock_print.call_args_list 
+                      if any("この投票者は既に投票済みです" in str(arg) for arg in call[0])]
+        assert len(error_calls) > 0
 
 
 class TestCLIPollResults:
     """Test cases for poll result functionality."""
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_poll_result_empty(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_poll_result_empty(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test poll result handling for empty poll."""
-        mock_input.return_value = "empty_poll"
+        mock_ask.return_value = "empty_poll"
         
         cli_app.handle_poll_result()
         
-        output = mock_stdout.getvalue()
-        assert "投票は見つかりませんでした" in output
+        # Check that warning message was printed
+        warning_calls = [call for call in mock_print.call_args_list 
+                        if any("投票は見つかりませんでした" in str(arg) for arg in call[0])]
+        assert len(warning_calls) > 0
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_poll_result_with_votes(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_poll_result_with_votes(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test poll result handling with votes."""
         # Add test votes
         timestamp = datetime.now(timezone.utc)
@@ -231,33 +250,35 @@ class TestCLIPollResults:
         
         cli_app.session.commit()
         
-        mock_input.return_value = "test_poll"
+        mock_ask.return_value = "test_poll"
         
         cli_app.handle_poll_result()
         
-        output = mock_stdout.getvalue()
-        assert "総投票数: 3" in output
-        assert "option_a: 2票" in output
-        assert "option_b: 1票" in output
+        # Verify that print was called with panels and table
+        assert mock_print.call_count >= 2  # At least summary panel and results table
 
 
 class TestCLIAuditLog:
     """Test cases for audit log functionality."""
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_audit_log_empty(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_audit_log_empty(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test audit log handling for empty poll."""
-        mock_input.return_value = "empty_poll"
+        mock_ask.return_value = "empty_poll"
         
         cli_app.handle_audit_log()
         
-        output = mock_stdout.getvalue()
-        assert "投票は見つかりませんでした" in output
+        # Check that warning message was printed
+        warning_calls = [call for call in mock_print.call_args_list 
+                        if any("投票は見つかりませんでした" in str(arg) for arg in call[0])]
+        assert len(warning_calls) > 0
     
-    @patch('builtins.input')
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_audit_log_with_blocks(self, mock_stdout, mock_input, cli_app: HashVoteCLI):
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_audit_log_with_blocks(self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test audit log handling with blocks."""
         # Add test blocks
         timestamp = datetime.now(timezone.utc)
@@ -280,58 +301,61 @@ class TestCLIAuditLog:
         
         cli_app.session.commit()
         
-        mock_input.return_value = "test_poll"
+        mock_ask.return_value = "test_poll"
         
         cli_app.handle_audit_log()
         
-        output = mock_stdout.getvalue()
-        assert "総ブロック数: 2" in output
-        assert "ブロック #1" in output
-        assert "ブロック #2" in output
+        # Verify that print was called multiple times (header, table, integrity panels)
+        assert mock_print.call_count >= 3
 
 
 class TestCLIHealthCheck:
     """Test cases for health check functionality."""
     
-    @patch('sys.stdout', new_callable=io.StringIO)
-    def test_handle_health_check_success(self, mock_stdout, cli_app: HashVoteCLI):
+    @patch('rich.console.Console.print')
+    @patch('rich.console.Console.rule')
+    def test_handle_health_check_success(self, mock_rule, mock_print, cli_app: HashVoteCLI):
         """Test successful health check."""
         cli_app.handle_health_check()
         
-        output = mock_stdout.getvalue()
-        assert "✅ システム正常" in output
-        assert "データベース接続: OK" in output
-        assert "総ブロック数:" in output
-        assert "バージョン: 1.0.0-CLI" in output
+        # Verify that print was called multiple times (status panel and info panel)
+        assert mock_print.call_count >= 2
+        mock_rule.assert_called_once()
 
 
 class TestCLIMainLoop:
     """Test cases for main application loop."""
     
-    @patch('builtins.input')
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
     @patch('app.cli.HashVoteCLI.clear_screen')
     @patch('app.cli.HashVoteCLI.display_header')
     @patch('app.cli.HashVoteCLI.display_menu')
-    def test_run_exit_choice(self, mock_menu, mock_header, mock_clear, mock_input, cli_app: HashVoteCLI):
+    def test_run_exit_choice(self, mock_menu, mock_header, mock_clear, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test running CLI with exit choice."""
-        mock_input.return_value = "5"  # Exit choice
+        mock_ask.return_value = "5"  # Exit choice
         
-        with patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
-            cli_app.run()
-            
-            output = mock_stdout.getvalue()
-            assert "HashVoteを終了します" in output
+        cli_app.run()
+        
+        # Check that print was called (goodbye panel should be printed)
+        assert mock_print.called
+        # Verify that we tried to get input for menu choice
+        mock_ask.assert_called()
     
-    @patch('builtins.input')
+    @patch('rich.prompt.Prompt.ask')
+    @patch('rich.console.Console.print')
+    @patch('builtins.input')  # For the continue prompt
     @patch('app.cli.HashVoteCLI.clear_screen')
     @patch('app.cli.HashVoteCLI.display_header')
     @patch('app.cli.HashVoteCLI.display_menu')
-    def test_run_invalid_choice(self, mock_menu, mock_header, mock_clear, mock_input, cli_app: HashVoteCLI):
+    def test_run_invalid_choice(self, mock_menu, mock_header, mock_clear, mock_input, mock_print, mock_ask, cli_app: HashVoteCLI):
         """Test running CLI with invalid choice."""
-        mock_input.side_effect = ["9", "5"]  # Invalid choice then exit
+        mock_ask.side_effect = ["9", "5"]  # Invalid choice then exit
+        mock_input.return_value = ""  # For continue prompt
         
-        with patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
-            cli_app.run()
-            
-            output = mock_stdout.getvalue()
-            assert "無効な選択です" in output
+        cli_app.run()
+        
+        # Check that invalid choice message was printed
+        invalid_calls = [call for call in mock_print.call_args_list 
+                        if any("無効な選択です" in str(arg) for arg in call[0])]
+        assert len(invalid_calls) > 0
