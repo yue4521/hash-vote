@@ -13,7 +13,7 @@ HashVoteシステムの包括的なテストスイートです。
 ```
 tests/
 ├── test_pow.py      # Proof-of-Work機能テスト（12テスト）
-├── test_api.py      # API統合テスト（12テスト）
+├── test_cli.py      # CLI機能テスト（12テスト）
 └── __init__.py      # パッケージ初期化
 ```
 
@@ -43,31 +43,31 @@ HashVoteの核となる暗号学的機能をテストします。
 - **`test_get_difficulty_target_8_bits`**: 8ビット難易度目標
 - **`test_get_difficulty_target_format`**: 目標値形式検証
 
-### `test_api.py` - API統合テスト
+### `test_cli.py` - CLI機能テスト
 
-FastAPIエンドポイントとビジネスロジックの統合テストです。
+コンソールアプリケーションとビジネスロジックの統合テストです。
 
-#### TestVoteEndpoint（3テスト）
-- **`test_vote_initial_request`**: 初期投票リクエスト（第1段階）
-- **`test_vote_full_submission`**: 完全投票プロセス（第1+第2段階）
-- **`test_vote_duplicate_rejection`**: 重複投票の拒否
+#### TestCLIVoting（4テスト）
+- **`test_vote_process`**: 完全な投票プロセスのテスト
+- **`test_duplicate_vote_prevention`**: 重複投票防止機能
+- **`test_invalid_input_handling`**: 無効入力のエラーハンドリング
+- **`test_pow_calculation`**: Proof-of-Work計算の統合テスト
 
-#### TestPollResultEndpoint（3テスト）
-- **`test_poll_result_empty`**: 空の投票結果
-- **`test_poll_result_with_votes`**: 投票データがある場合の結果
-- **`test_poll_result_chain_integrity`**: チェーン整合性検証
+#### TestCLIResults（3テスト）
+- **`test_poll_results_display`**: 投票結果表示機能
+- **`test_empty_poll_handling`**: 空の投票処理
+- **`test_result_calculation`**: 結果集計処理
 
-#### TestPollAuditEndpoint（3テスト）
-- **`test_poll_audit_empty`**: 空の監査証跡
-- **`test_poll_audit_with_blocks`**: ブロックがある場合の監査
-- **`test_poll_audit_chain_validation`**: チェーン検証状態
+#### TestCLIAudit（3テスト）
+- **`test_audit_log_display`**: 監査ログ表示機能
+- **`test_block_details_formatting`**: ブロック詳細情報のフォーマット
+- **`test_chain_validation_display`**: チェーン検証状態表示
 
-#### TestHealthEndpoint（1テスト）
-- **`test_health_check`**: ヘルスチェックエンドポイント
+#### TestCLIHealthCheck（1テスト）
+- **`test_health_check_display`**: ヘルスチェック機能
 
-#### TestErrorHandling（2テスト）
-- **`test_vote_missing_fields`**: 必須フィールド不足エラー
-- **`test_vote_invalid_pow`**: 無効なProof-of-Workエラー
+#### TestCLIUtilities（1テスト）
+- **`test_database_setup`**: データベース初期化機能
 
 ## テスト実行方法
 
@@ -82,7 +82,7 @@ pytest -v
 
 # 特定ファイルのみ
 pytest tests/test_pow.py
-pytest tests/test_api.py
+pytest tests/test_cli.py
 ```
 
 ### カバレッジ確認

@@ -31,8 +31,6 @@ block_hash = SHA-256(poll_id + voter_hash + choice + timestamp + prev_hash + non
 ## 技術スタック
 
 - **Python 3.12+**
-- **FastAPI** - RESTful API
 - **SQLModel** - データベースORM
 - **SQLite** - 永続化ストレージ
-- **Uvicorn** - ASGIサーバー
 - **pytest** - テストフレームワーク

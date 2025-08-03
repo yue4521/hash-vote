@@ -24,39 +24,3 @@ class Block(SQLModel, table=True):
     prev_hash: str = Field()
     nonce: int = Field()
     block_hash: str = Field(unique=True, index=True)
-
-
-class VoteRequest(SQLModel):
-    """Request model for initial vote submission (without nonce)."""
-    poll_id: str
-    choice: str
-    voter_hash: str
-
-
-class VoteSubmission(SQLModel):
-    """Request model for final vote submission (with nonce)."""
-    poll_id: str
-    choice: str
-    voter_hash: str
-    nonce: int
-
-
-class VoteResponse(SQLModel):
-    """Response model for vote requests."""
-    difficulty_target: str
-    prev_hash: str
-    message: str
-
-
-class PollResult(SQLModel):
-    """Response model for poll results."""
-    poll_id: str
-    total_votes: int
-    choices: dict[str, int]
-
-
-class AuditResponse(SQLModel):
-    """Response model for audit trail."""
-    poll_id: str
-    blocks: list[dict]
-    chain_valid: bool

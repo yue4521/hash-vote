@@ -1,3 +1,62 @@
+# WebAPI機能削除とCLI専用化
+
+## ToDo リスト
+
+- [x] WebAPI関連ファイルを削除（app/main.py, tests/test_api.py, docs/api-usage.md）
+- [x] requirements.txtからWebAPI関連依存関係を削除（fastapi, uvicorn, httpx）
+- [x] app/models.pyからAPI関連モデルを削除（VoteRequest, VoteSubmission, VoteResponse, PollResult, AuditResponse）
+- [x] readme.mdからWebAPI関連セクションを削除
+- [x] app/README.mdからFastAPI関連説明を削除
+- [x] tests/README.mdからAPIテスト関連説明を削除
+- [x] docs/development.mdからAPI開発関連セクションを削除
+- [x] docs/testing.mdからAPIテスト関連セクションを削除
+- [x] docs/technical-specs.mdからFastAPI/Uvicorn関連技術仕様を削除
+- [x] tasks/todo.mdにWebAPI機能削除完了タスクセクションを追加
+- [x] 修正後にCLI/PoWテストを実行して動作確認
+- [x] 変更をコミットしてプッシュ
+
+## 概要
+HashVoteシステムからWebAPI機能を完全に削除し、CLI専用の投票システムに変更
+
+## 削除内容
+- FastAPIアプリケーション（app/main.py）
+- APIテスト（tests/test_api.py）
+- API使用方法ドキュメント（docs/api-usage.md）
+- FastAPI/uvicorn/httpx依存関係
+- API専用データモデル
+
+## 保持内容
+- CLI アプリケーション（app/cli.py, console_main.py）
+- PoW機能（app/pow.py）
+- データベース層（app/database.py）
+- ブロックモデル（app/models.py）
+- CLI/PoWテスト（tests/test_cli.py, tests/test_pow.py）
+
+---
+
+# Pythonコンソール対応への変更
+
+## ToDo リスト
+
+- [x] feature/console-interface ブランチを作成
+- [x] tasks/todo.mdに新しいタスクセクション追加
+- [x] app/cli.py を新規作成（CLIインターフェース実装）
+- [x] console_main.py をルートに作成（CLIエントリーポイント）
+- [x] tests/test_cli.py を新規作成（CLI機能テスト）
+- [x] readme.md にCLI使用方法を追加
+- [x] CLIアプリケーションの動作テスト
+- [x] 変更をコミットしてプッシュ
+
+## 概要
+WebAPI形式のHashVoteシステムをPythonコンソール上で直接操作できるCLIアプリケーションに変更
+
+## 方針
+- 既存のビジネスロジック（models.py, pow.py, database.py）を再利用
+- ~~WebAPI実装は一旦保持（後で削除予定）~~ → 削除完了
+- メニュー駆動のコンソールアプリケーション実装
+
+---
+
 # プレリリースタグ作成
 
 ## ToDo リスト
