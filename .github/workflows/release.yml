@@ -1,0 +1,60 @@
+# .github/workflows/release.yml
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  id-token: write   # OIDC 用
+  contents: write   # バッジ更新用
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: |
+          python -m pip install --upgrade build
+          python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  update-badge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Update README badge
+        run: |
+          sed -i "s/version-[^-]*-green/version-${{ steps.version.outputs.VERSION }}-green/g" README.md
+      - name: Commit badge update
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git commit -m "docs: READMEバージョンをv${{ steps.version.outputs.VERSION }}に更新
+
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+
+          Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
+          git push
+
+  publish:
+    needs: [build, update-badge]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {name: dist, path: dist}
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1
