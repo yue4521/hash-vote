@@ -1,5 +1,5 @@
 sqlmodel==0.0.24
 pytest==8.4.1
 pytest-asyncio==1.1.0
-rich==13.9.4
+rich==14.1.0
 colorama==0.4.6
