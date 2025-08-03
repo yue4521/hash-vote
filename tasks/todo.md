@@ -235,6 +235,41 @@ pip install -r requirements.txt
 
 この実装により、要件で指定されたProof-of-Work投票システムの完全な動作環境が構築されました。
 
+---
+
+# v1.0.0正式リリース
+
+## ToDo リスト（完了済み）
+
+- [x] app/__init__.py にバージョン1.0.0追加
+- [x] README.md にバージョンバッジ追加
+- [x] datetime.utcnow() deprecation warnings修正
+- [x] 全32テストの実行と動作確認（100%パス）
+- [x] v1.0.0タグの作成とプッシュ
+- [x] GitHub Release作成（https://github.com/yue4521/hash-vote/releases/tag/v1.0.0）
+- [x] tasks/todo.mdに完了記録を追加
+
+## 概要
+HashVoteプロジェクトの初回正式リリース（v1.0.0）を完了しました。
+
+## 実施内容
+1. **バージョン管理**: app/__init__.pyに1.0.0追加、README.mdバッジ更新
+2. **コード品質向上**: datetime.utcnow()のdeprecation warnings修正
+3. **品質保証**: 全32テスト100%パス確認
+4. **リリース作業**: セマンティックバージョニングでv1.0.0タグ作成
+5. **ドキュメンテーション**: GitHub Releaseページ作成
+
+## リリース内容
+- **主要機能**: PoW投票システム、CLI、改ざん耐性、監査機能
+- **技術仕様**: Python 3.12+、SQLite、32テスト、MIT License
+- **リリースURL**: https://github.com/yue4521/hash-vote/releases/tag/v1.0.0
+
+## 品質メトリクス
+- テスト成功率: 100% (32/32)
+- Warning数: 0（全deprecation warning解決）
+- リリース準備時間: 約20分
+- セキュリティ問題: なし
+
 ## appとtestsフォルダのREADME.md作成タスク
 
 ### 概要
