@@ -34,3 +34,13 @@ def get_session() -> Generator[Session, None, None]:
     """
     with Session(engine) as session:
         yield session
+
+
+def get_session_direct() -> Session:
+    """
+    Get a direct database session for CLI usage.
+    
+    Returns:
+        Database session instance
+    """
+    return Session(engine)

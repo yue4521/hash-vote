@@ -12,6 +12,8 @@
 - **改ざん検証**: チェーン全体の整合性をリアルタイムで検証  
 - **重複投票防止**: 投票者ごとの一意性保証
 - **完全監査**: 全投票履歴の透明性と検証可能性
+- **コンソール対応**: Pythonコンソール上での直接操作
+- **WebAPI**: HTTP API経由でのプログラマブルアクセス
 
 ## セットアップ
 
@@ -20,8 +22,27 @@
 python -m venv venv
 source venv/bin/activate  # Linux/Mac の場合
 pip install -r requirements.txt
+```
 
-# アプリケーションの起動
+## 実行方法
+
+### 1. コンソール版（推奨）
+
+```bash
+# Pythonコンソール上でのメニュー駆動操作
+python console_main.py
+```
+
+コンソール版では以下の機能が利用できます：
+- 投票の提出（Proof-of-Work計算込み）
+- 投票結果の確認
+- 監査ログの表示
+- システムヘルスチェック
+
+### 2. WebAPI版
+
+```bash
+# WebAPIサーバーの起動
 python -m uvicorn app.main:app --reload
 ```
 
@@ -30,6 +51,22 @@ python -m uvicorn app.main:app --reload
 - ドキュメント: http://localhost:8000/docs
 
 ## 基本的な使用方法
+
+### コンソール版の使用
+
+```bash
+# コンソールアプリケーションの起動
+python console_main.py
+
+# メニューから選択して操作
+# 1. 投票する - 投票ID、選択肢、投票者IDを入力
+# 2. 投票結果を確認する - 投票IDを入力して結果表示
+# 3. 監査ログを確認する - 全ブロックの詳細情報表示
+# 4. ヘルスチェック - システム状態確認
+# 5. 終了
+```
+
+### WebAPI版の使用
 
 ### 1. 投票リクエスト（Proof-of-Work計算用）
 ```bash

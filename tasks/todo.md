@@ -1,3 +1,26 @@
+# Pythonコンソール対応への変更
+
+## ToDo リスト
+
+- [x] feature/console-interface ブランチを作成
+- [x] tasks/todo.mdに新しいタスクセクション追加
+- [x] app/cli.py を新規作成（CLIインターフェース実装）
+- [x] console_main.py をルートに作成（CLIエントリーポイント）
+- [x] tests/test_cli.py を新規作成（CLI機能テスト）
+- [x] readme.md にCLI使用方法を追加
+- [x] CLIアプリケーションの動作テスト
+- [ ] 変更をコミットしてプッシュ
+
+## 概要
+WebAPI形式のHashVoteシステムをPythonコンソール上で直接操作できるCLIアプリケーションに変更
+
+## 方針
+- 既存のビジネスロジック（models.py, pow.py, database.py）を再利用
+- WebAPI実装は一旦保持（後で削除予定）
+- メニュー駆動のコンソールアプリケーション実装
+
+---
+
 # プレリリースタグ作成
 
 ## ToDo リスト
