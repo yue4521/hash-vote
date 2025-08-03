@@ -16,7 +16,7 @@ if __name__ == "__main__":
     print("HashVote CLI Starting...")
     print("Pythonコンソール版HashVote投票システムを開始します。")
     print()
-    
+
     try:
         main()
     except KeyboardInterrupt:

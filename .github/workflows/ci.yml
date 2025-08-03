@@ -8,7 +8,7 @@ on:
     - cron: '0 3 * * 0'   # UTC 日曜 12:00 JST
 
 jobs:
-  test:
+  python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
