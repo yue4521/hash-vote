@@ -63,7 +63,9 @@ class SQLManager:
 
             # SELECTクエリまたはPRAGMAの場合は結果を返す
             query_upper = query.strip().upper()
-            if query_upper.startswith("SELECT") or query_upper.startswith("PRAGMA"):
+            if query_upper.startswith("SELECT") or query_upper.startswith(
+                "PRAGMA"
+            ):
                 rows = cursor.fetchall()
                 return [dict(row) for row in rows]
             else:
@@ -91,7 +93,9 @@ class SQLManager:
             file_path = self.project_root / sql_file_path
 
         if not file_path.exists():
-            raise FileNotFoundError(f"SQLファイルが見つかりません: {file_path}")
+            raise FileNotFoundError(
+                f"SQLファイルが見つかりません: {file_path}"
+            )
 
         with open(file_path, "r", encoding="utf-8") as file:
             sql_script = file.read()
@@ -182,7 +186,9 @@ class SQLManager:
 
         # ファイルサイズ
         stats["file_size_bytes"] = (
-            os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
+            os.path.getsize(self.db_path)
+            if os.path.exists(self.db_path)
+            else 0
         )
         stats["file_size_mb"] = round(
             stats["file_size_bytes"] / (1024 * 1024),
@@ -250,7 +256,9 @@ class SQLManager:
             # 最初のブロック（前ハッシュが全ゼロ）でない場合
             if prev_hash != "0" * 64:
                 if poll_id not in prev_hash_map:
-                    errors.append(f"ブロックID {block['id']}: 前ブロックが存在しません")
+                    errors.append(
+                        f"ブロックID {block['id']}: 前ブロックが存在しません"
+                    )
                 elif prev_hash_map[poll_id] != prev_hash:
                     errors.append(
                         f"ブロックID {block['id']}: 前ブロックハッシュが不正です"
@@ -292,7 +300,9 @@ class SQLManager:
         where_clause = f"WHERE poll_id = '{poll_id}'" if poll_id else ""
 
         # 総投票数
-        total_votes_query = f"SELECT COUNT(*) as total FROM blocks {where_clause}"
+        total_votes_query = (
+            f"SELECT COUNT(*) as total FROM blocks {where_clause}"
+        )
         total_result = self.execute_query(total_votes_query)
         stats["total_votes"] = total_result[0]["total"] if total_result else 0
 

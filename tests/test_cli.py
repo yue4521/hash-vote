@@ -39,7 +39,9 @@ class TestHashVoteCLI:
 
     def test_initialization(self):
         """Test CLI initialization."""
-        with patch("app.cli.create_db_and_tables"), patch("app.cli.get_session_direct"):
+        with patch("app.cli.create_db_and_tables"), patch(
+            "app.cli.get_session_direct"
+        ):
             app = HashVoteCLI()
             # Mock may return None
             assert app.session is not None or app.session is None
@@ -223,7 +225,9 @@ class TestCLIVoteHandling:
         error_calls = [
             call
             for call in mock_print.call_args_list
-            if any("この投票者は既に投票済みです" in str(arg) for arg in call[0])
+            if any(
+                "この投票者は既に投票済みです" in str(arg) for arg in call[0]
+            )
         ]
         assert len(error_calls) > 0
 

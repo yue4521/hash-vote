@@ -156,7 +156,9 @@ class HashVoteCLI:
 
         # Check for duplicate vote
         if self.check_duplicate_vote(poll_id, voter_hash):
-            self.console.print("[red]❌ エラー: この投票者は既に投票済みです[/red]")
+            self.console.print(
+                "[red]❌ エラー: この投票者は既に投票済みです[/red]"
+            )
             return
 
         # Get previous hash
@@ -218,7 +220,9 @@ class HashVoteCLI:
             nonce,
             difficulty_bits=difficulty,
         ):
-            self.console.print("[red]❌ エラー: Proof of Work検証に失敗しました[/red]")
+            self.console.print(
+                "[red]❌ エラー: Proof of Work検証に失敗しました[/red]"
+            )
             return
 
         # Calculate block hash
@@ -247,7 +251,9 @@ class HashVoteCLI:
             success_table.add_column("項目", style="green bold")
             success_table.add_column("値", style="white")
             success_table.add_row("🆔 ブロックID", str(block.id))
-            success_table.add_row("🔗 ブロックハッシュ", f"{block_hash[:32]}...")
+            success_table.add_row(
+                "🔗 ブロックハッシュ", f"{block_hash[:32]}..."
+            )
             success_table.add_row("🔢 Nonce", str(nonce))
 
             success_panel = Panel(
@@ -287,7 +293,9 @@ class HashVoteCLI:
         # Count votes by choice
         choice_counts: Dict[str, int] = {}
         for block in blocks:
-            choice_counts[block.choice] = choice_counts.get(block.choice, 0) + 1
+            choice_counts[block.choice] = (
+                choice_counts.get(block.choice, 0) + 1
+            )
 
         # Create results table
         results_table = Table(
@@ -341,7 +349,9 @@ class HashVoteCLI:
             return
 
         # Get all blocks in order
-        statement = select(Block).where(Block.poll_id == poll_id).order_by(Block.id)
+        statement = (
+            select(Block).where(Block.poll_id == poll_id).order_by(Block.id)
+        )
         blocks = self.session.exec(statement).all()
 
         if not blocks:
@@ -552,7 +562,8 @@ class HashVoteCLI:
         if "top_polls" in stats and stats["top_polls"]:
             top_poll = stats["top_polls"][0]
             stats_table.add_row(
-                "最多投票ID", f"{top_poll['poll_id']} ({top_poll['vote_count']} 票)"
+                "最多投票ID",
+                f"{top_poll['poll_id']} ({top_poll['vote_count']} 票)",
             )
 
         if "latest_vote" in stats and stats["latest_vote"]:
@@ -579,7 +590,9 @@ class HashVoteCLI:
             query_lines.append(line)
 
         if not query_lines:
-            self.console.print("[yellow]クエリが入力されませんでした。[/yellow]")
+            self.console.print(
+                "[yellow]クエリが入力されませんでした。[/yellow]"
+            )
             return
 
         query = " ".join(query_lines)
@@ -590,7 +603,9 @@ class HashVoteCLI:
             if results:
                 if len(results) > 0:
                     # Create table for results
-                    result_table = Table(title="📋 クエリ結果", box=box.ROUNDED)
+                    result_table = Table(
+                        title="📋 クエリ結果", box=box.ROUNDED
+                    )
 
                     # Add columns
                     if results:
@@ -615,7 +630,9 @@ class HashVoteCLI:
                         "[green]✅ クエリが正常に実行されました（結果なし）[/green]"
                     )
             else:
-                self.console.print("[green]✅ クエリが正常に実行されました[/green]")
+                self.console.print(
+                    "[green]✅ クエリが正常に実行されました[/green]"
+                )
 
         except Exception as e:
             self.console.print(f"[red]❌ クエリエラー: {str(e)}[/red]")
@@ -752,7 +769,9 @@ class HashVoteCLI:
             results = sql_manager.execute_query(query)
 
             if results:
-                behavior_table = Table(title="👤 投票者行動分析", box=box.ROUNDED)
+                behavior_table = Table(
+                    title="👤 投票者行動分析", box=box.ROUNDED
+                )
                 behavior_table.add_column("参加投票数", style="cyan")
                 behavior_table.add_column("投票者数", style="white")
 
@@ -803,7 +822,9 @@ class HashVoteCLI:
                     input()
 
         except KeyboardInterrupt:
-            self.console.print("\n\n[yellow]⚠️ プログラムが中断されました。[/yellow]")
+            self.console.print(
+                "\n\n[yellow]⚠️ プログラムが中断されました。[/yellow]"
+            )
         except Exception as e:
             self.console.print(f"\n[red]❌ 予期しないエラー: {str(e)}[/red]")
         finally:
