@@ -7,10 +7,9 @@ import pytest
 import tempfile
 import os
 from datetime import datetime, timezone
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from app.sql_functions import SQLManager
-from app.models import Block
 
 
 class TestSQLManager:
@@ -36,14 +35,16 @@ class TestSQLManager:
 
         # テーブルが作成されているかチェック
         result = sql_manager.execute_query(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='blocks'"
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name='blocks'"
         )
         assert len(result) == 1
         assert result[0]["name"] == "blocks"
 
         # インデックスが作成されているかチェック
         result = sql_manager.execute_query(
-            "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='blocks'"
+            "SELECT name FROM sqlite_master WHERE type='index' "
+            "AND tbl_name='blocks'"
         )
         assert len(result) >= 4  # 少なくとも4つのインデックスが作成される
 
@@ -53,8 +54,9 @@ class TestSQLManager:
 
         # データを挿入
         sql_manager.execute_query(
-            """INSERT INTO blocks 
-               (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+            """INSERT INTO blocks
+               (poll_id, voter_hash, choice, timestamp, prev_hash,
+                nonce, block_hash)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 "test_poll",
@@ -79,8 +81,9 @@ class TestSQLManager:
 
         # データ挿入
         result = sql_manager.execute_query(
-            """INSERT INTO blocks 
-               (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+            """INSERT INTO blocks
+               (poll_id, voter_hash, choice, timestamp, prev_hash,
+                nonce, block_hash)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 "test_poll",
@@ -97,7 +100,9 @@ class TestSQLManager:
         assert result == []
 
         # データが実際に挿入されたかチェック
-        count_result = sql_manager.execute_query("SELECT COUNT(*) as count FROM blocks")
+        count_result = sql_manager.execute_query(
+            "SELECT COUNT(*) as count FROM blocks"
+        )
         assert count_result[0]["count"] == 1
 
     def test_execute_script(self, sql_manager):
@@ -111,7 +116,9 @@ class TestSQLManager:
         sql_manager.execute_script(script)
 
         # データが挿入されたかチェック
-        result = sql_manager.execute_query("SELECT * FROM test_table ORDER BY id")
+        result = sql_manager.execute_query(
+            "SELECT * FROM test_table ORDER BY id"
+        )
         assert len(result) == 2
         assert result[0]["name"] == "test1"
         assert result[1]["name"] == "test2"
@@ -178,8 +185,9 @@ class TestSQLManager:
 
         for data in test_data:
             sql_manager.execute_query(
-                """INSERT INTO blocks 
-                   (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+                """INSERT INTO blocks
+                   (poll_id, voter_hash, choice, timestamp, prev_hash,
+                    nonce, block_hash)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 data,
             )
@@ -206,8 +214,9 @@ class TestSQLManager:
 
         # テストデータ挿入
         sql_manager.execute_query(
-            """INSERT INTO blocks 
-               (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+            """INSERT INTO blocks
+               (poll_id, voter_hash, choice, timestamp, prev_hash,
+                nonce, block_hash)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 "test_poll",
@@ -252,8 +261,9 @@ class TestSQLManager:
 
         for data in test_data:
             sql_manager.execute_query(
-                """INSERT INTO blocks 
-                   (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+                """INSERT INTO blocks
+                   (poll_id, voter_hash, choice, timestamp, prev_hash,
+                    nonce, block_hash)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 data,
             )
@@ -284,8 +294,9 @@ class TestSQLManager:
 
         for data in test_data:
             sql_manager.execute_query(
-                """INSERT INTO blocks 
-                   (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+                """INSERT INTO blocks
+                   (poll_id, voter_hash, choice, timestamp, prev_hash,
+                    nonce, block_hash)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 data,
             )
@@ -310,8 +321,9 @@ class TestSQLManager:
 
         for data in test_data:
             sql_manager.execute_query(
-                """INSERT INTO blocks 
-                   (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+                """INSERT INTO blocks
+                   (poll_id, voter_hash, choice, timestamp, prev_hash,
+                    nonce, block_hash)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 data,
             )
@@ -326,7 +338,9 @@ class TestSQLManager:
         assert len(choice_dist) == 3  # yes, no, maybe
 
         # yesが最多（2票）であることをチェック
-        yes_votes = next(item for item in choice_dist if item["choice"] == "yes")
+        yes_votes = next(
+            item for item in choice_dist if item["choice"] == "yes"
+        )
         assert yes_votes["count"] == 2
         assert yes_votes["percentage"] == 50.0
 
@@ -344,8 +358,9 @@ class TestSQLManager:
 
         for data in test_data:
             sql_manager.execute_query(
-                """INSERT INTO blocks 
-                   (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+                """INSERT INTO blocks
+                   (poll_id, voter_hash, choice, timestamp, prev_hash,
+                    nonce, block_hash)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 data,
             )
@@ -376,7 +391,8 @@ class TestSQLManager:
 
         # テーブルが作成されたかチェック
         result = sql_manager.execute_query(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='test_file'"
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name='test_file'"
         )
         assert len(result) == 1
 
@@ -390,8 +406,9 @@ class TestSQLManager:
         # 元のデータベースを初期化してデータを挿入
         sql_manager.init_database()
         sql_manager.execute_query(
-            """INSERT INTO blocks 
-               (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+            """INSERT INTO blocks
+               (poll_id, voter_hash, choice, timestamp, prev_hash,
+                nonce, block_hash)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 "original_poll",
@@ -410,7 +427,9 @@ class TestSQLManager:
         try:
             # データベースを初期化して空にする
             sql_manager.init_database()
-            result = sql_manager.execute_query("SELECT COUNT(*) as count FROM blocks")
+            result = sql_manager.execute_query(
+                "SELECT COUNT(*) as count FROM blocks"
+            )
             assert result[0]["count"] == 0
 
             # バックアップから復元
@@ -479,8 +498,9 @@ class TestSQLManagerIntegration:
 
         for vote in test_votes:
             sql_manager.execute_query(
-                """INSERT INTO blocks 
-                   (poll_id, voter_hash, choice, timestamp, prev_hash, nonce, block_hash)
+                """INSERT INTO blocks
+                   (poll_id, voter_hash, choice, timestamp, prev_hash,
+                    nonce, block_hash)
                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 vote,
             )
@@ -507,7 +527,9 @@ class TestSQLManagerIntegration:
             sql_manager.restore_database(backup_path)
 
             # データが復元されたかチェック
-            result = sql_manager.execute_query("SELECT COUNT(*) as count FROM blocks")
+            result = sql_manager.execute_query(
+                "SELECT COUNT(*) as count FROM blocks"
+            )
             assert result[0]["count"] == 3
 
         finally:

@@ -2,9 +2,10 @@
 Unit tests for proof-of-work functionality.
 """
 
-import pytest
 from datetime import datetime
-from app.pow import hash_block, compute_nonce, verify_pow, get_difficulty_target
+from app.pow import (
+    hash_block, compute_nonce, verify_pow, get_difficulty_target
+)
 
 
 class TestHashBlock:
@@ -14,8 +15,12 @@ class TestHashBlock:
         """Test that hash_block produces deterministic results."""
         timestamp = datetime(2024, 1, 1, 12, 0, 0)
 
-        hash1 = hash_block("poll1", "voter123", "choice_a", timestamp, "prev_hash", 42)
-        hash2 = hash_block("poll1", "voter123", "choice_a", timestamp, "prev_hash", 42)
+        hash1 = hash_block(
+            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 42
+        )
+        hash2 = hash_block(
+            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 42
+        )
 
         assert hash1 == hash2
         assert len(hash1) == 64  # SHA-256 produces 64 hex characters
@@ -24,9 +29,15 @@ class TestHashBlock:
         """Test that different inputs produce different hashes."""
         timestamp = datetime(2024, 1, 1, 12, 0, 0)
 
-        hash1 = hash_block("poll1", "voter123", "choice_a", timestamp, "prev_hash", 42)
-        hash2 = hash_block("poll1", "voter123", "choice_b", timestamp, "prev_hash", 42)
-        hash3 = hash_block("poll1", "voter123", "choice_a", timestamp, "prev_hash", 43)
+        hash1 = hash_block(
+            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 42
+        )
+        hash2 = hash_block(
+            "poll1", "voter123", "choice_b", timestamp, "prev_hash", 42
+        )
+        hash3 = hash_block(
+            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 43
+        )
 
         assert hash1 != hash2
         assert hash1 != hash3
@@ -87,11 +98,15 @@ class TestComputeNonce:
 
         # Should timeout and return None, and should respect the timeout
         if nonce is not None:
-            # If we found a nonce, execution should have been very fast (within timeout)
-            assert (end_time - start_time) <= 0.05  # Allow some margin
+            # If we found a nonce, execution should have been
+            # very fast (within timeout)
+            # Allow some margin
+            assert (end_time - start_time) <= 0.05
         else:
-            # If we timed out, execution should have been close to timeout duration
-            assert (end_time - start_time) <= 0.1  # Allow some margin for timeout
+            # If we timed out, execution should have been
+            # close to timeout duration
+            # Allow some margin for timeout
+            assert (end_time - start_time) <= 0.1
 
     def test_compute_nonce_produces_valid_pow(self):
         """Test that computed nonce produces valid proof-of-work."""
@@ -169,7 +184,8 @@ class TestVerifyPow:
             timestamp,
             "prev_hash",
             0,
-            difficulty_bits=18,  # High difficulty, nonce 0 very unlikely to work
+            # High difficulty, nonce 0 very unlikely to work
+            difficulty_bits=18,
         )
 
         assert not is_valid

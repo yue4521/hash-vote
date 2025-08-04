@@ -7,7 +7,7 @@ import sqlite3
 import os
 import shutil
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Tuple
 from pathlib import Path
 
 from .database import DATABASE_URL
@@ -37,10 +37,12 @@ class SQLManager:
             SQLite接続オブジェクト
         """
         conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row  # 辞書形式でレコードにアクセス可能
+        conn.row_factory = sqlite3.Row  # 辞書形式でアクセス可能
         return conn
 
-    def execute_query(self, query: str, params: tuple = None) -> List[Dict[str, Any]]:
+    def execute_query(
+        self, query: str, params: tuple = None
+    ) -> List[Dict[str, Any]]:
         """SQLクエリを実行して結果を返す
 
         Args:
@@ -59,7 +61,8 @@ class SQLManager:
 
             # SELECTクエリまたはPRAGMAの場合は結果を返す
             query_upper = query.strip().upper()
-            if query_upper.startswith("SELECT") or query_upper.startswith("PRAGMA"):
+            if (query_upper.startswith("SELECT") or
+                    query_upper.startswith("PRAGMA")):
                 rows = cursor.fetchall()
                 return [dict(row) for row in rows]
             else:
@@ -99,7 +102,7 @@ class SQLManager:
         init_sql = """
         -- 既存テーブルを削除
         DROP TABLE IF EXISTS blocks;
-        
+
         -- blocksテーブルを作成
         CREATE TABLE blocks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,7 +115,7 @@ class SQLManager:
             block_hash VARCHAR NOT NULL UNIQUE,
             CONSTRAINT unique_vote UNIQUE (poll_id, voter_hash)
         );
-        
+
         -- インデックス作成
         CREATE INDEX ix_blocks_poll_id ON blocks (poll_id);
         CREATE INDEX ix_blocks_block_hash ON blocks (block_hash);
@@ -178,9 +181,12 @@ class SQLManager:
 
         # ファイルサイズ
         stats["file_size_bytes"] = (
-            os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
+            os.path.getsize(self.db_path)
+            if os.path.exists(self.db_path) else 0
         )
-        stats["file_size_mb"] = round(stats["file_size_bytes"] / (1024 * 1024), 2)
+        stats["file_size_mb"] = round(
+            stats["file_size_bytes"] / (1024 * 1024), 2
+        )
 
         # テーブル統計
         table_stats = {}
@@ -197,19 +203,19 @@ class SQLManager:
         if "blocks" in table_info:
             # 投票数の多い順にpoll_idを取得
             poll_stats_query = """
-            SELECT poll_id, COUNT(*) as vote_count 
-            FROM blocks 
-            GROUP BY poll_id 
-            ORDER BY vote_count DESC 
+            SELECT poll_id, COUNT(*) as vote_count
+            FROM blocks
+            GROUP BY poll_id
+            ORDER BY vote_count DESC
             LIMIT 5
             """
             stats["top_polls"] = self.execute_query(poll_stats_query)
 
             # 最新の投票
             latest_vote_query = """
-            SELECT poll_id, choice, timestamp 
-            FROM blocks 
-            ORDER BY timestamp DESC 
+            SELECT poll_id, choice, timestamp
+            FROM blocks
+            ORDER BY timestamp DESC
             LIMIT 1
             """
             latest_votes = self.execute_query(latest_vote_query)
@@ -254,9 +260,9 @@ class SQLManager:
 
         # 重複投票の確認
         duplicate_query = """
-        SELECT poll_id, voter_hash, COUNT(*) as count 
-        FROM blocks 
-        GROUP BY poll_id, voter_hash 
+        SELECT poll_id, voter_hash, COUNT(*) as count
+        FROM blocks
+        GROUP BY poll_id, voter_hash
         HAVING COUNT(*) > 1
         """
         duplicates = self.execute_query(duplicate_query)
@@ -264,7 +270,8 @@ class SQLManager:
         if duplicates:
             for dup in duplicates:
                 errors.append(
-                    f"重複投票: poll_id={dup['poll_id']}, voter_hash={dup['voter_hash'][:16]}..."
+                    f"重複投票: poll_id={dup['poll_id']}, "
+                    f"voter_hash={dup['voter_hash'][:16]}..."
                 )
 
         return len(errors) == 0, errors
@@ -281,19 +288,25 @@ class SQLManager:
         stats = {}
 
         # ベースクエリ
-        where_clause = f"WHERE poll_id = '{poll_id}'" if poll_id else ""
+        where_clause = (
+            f"WHERE poll_id = '{poll_id}'" if poll_id else ""
+        )
 
         # 総投票数
-        total_votes_query = f"SELECT COUNT(*) as total FROM blocks {where_clause}"
+        total_votes_query = (
+            f"SELECT COUNT(*) as total FROM blocks {where_clause}"
+        )
         total_result = self.execute_query(total_votes_query)
         stats["total_votes"] = total_result[0]["total"] if total_result else 0
 
         # 選択肢別投票数
         choice_stats_query = f"""
-        SELECT choice, COUNT(*) as count, 
-               ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM blocks {where_clause}), 2) as percentage
+        SELECT choice, COUNT(*) as count,
+               ROUND(COUNT(*) * 100.0 /
+                     (SELECT COUNT(*) FROM blocks {where_clause}), 2)
+               as percentage
         FROM blocks {where_clause}
-        GROUP BY choice 
+        GROUP BY choice
         ORDER BY count DESC
         """
         stats["choice_distribution"] = self.execute_query(choice_stats_query)
@@ -310,11 +323,11 @@ class SQLManager:
         # poll_id別統計（全体統計の場合のみ）
         if poll_id is None:
             poll_stats_query = """
-            SELECT poll_id, COUNT(*) as votes, 
-                   MIN(timestamp) as first_vote, 
+            SELECT poll_id, COUNT(*) as votes,
+                   MIN(timestamp) as first_vote,
                    MAX(timestamp) as last_vote
-            FROM blocks 
-            GROUP BY poll_id 
+            FROM blocks
+            GROUP BY poll_id
             ORDER BY votes DESC
             """
             stats["poll_distribution"] = self.execute_query(poll_stats_query)

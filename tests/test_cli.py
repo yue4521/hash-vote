@@ -3,9 +3,7 @@ Unit tests for CLI functionality.
 """
 
 import pytest
-import io
-import sys
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from datetime import datetime, timezone
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
@@ -41,12 +39,16 @@ class TestHashVoteCLI:
 
     def test_initialization(self):
         """Test CLI initialization."""
-        with patch("app.cli.create_db_and_tables"), patch("app.cli.get_session_direct"):
+        with patch("app.cli.create_db_and_tables"), patch(
+            "app.cli.get_session_direct"
+        ):
             app = HashVoteCLI()
+            # Mock may return None
             assert (
                 app.session is not None or app.session is None
-            )  # Mock may return None
-            assert hasattr(app, "console")  # Rich console should be initialized
+            )
+            # Rich console should be initialized
+            assert hasattr(app, "console")
 
     def test_get_latest_block_hash_empty(self, cli_app: HashVoteCLI):
         """Test getting latest block hash when no blocks exist."""
@@ -116,7 +118,8 @@ class TestHashVoteCLI:
         cli_app.display_header()
         # Should be called twice: once for panel, once for empty line
         assert mock_print.call_count >= 1
-        # Check that Panel was created (can't easily test content due to Rich formatting)
+        # Check that Panel was created
+        # (can't easily test content due to Rich formatting)
         call_args = mock_print.call_args_list
         assert len(call_args) > 0
 
@@ -285,7 +288,8 @@ class TestCLIPollResults:
         cli_app.handle_poll_result()
 
         # Verify that print was called with panels and table
-        assert mock_print.call_count >= 2  # At least summary panel and results table
+        # At least summary panel and results table
+        assert mock_print.call_count >= 2
 
 
 class TestCLIAuditLog:
@@ -342,7 +346,8 @@ class TestCLIAuditLog:
 
         cli_app.handle_audit_log()
 
-        # Verify that print was called multiple times (header, table, integrity panels)
+        # Verify that print was called multiple times
+        # (header, table, integrity panels)
         assert mock_print.call_count >= 3
 
 
@@ -357,7 +362,8 @@ class TestCLIHealthCheck:
         """Test successful health check."""
         cli_app.handle_health_check()
 
-        # Verify that print was called multiple times (status panel and info panel)
+        # Verify that print was called multiple times
+        # (status panel and info panel)
         assert mock_print.call_count >= 2
         mock_rule.assert_called_once()
 

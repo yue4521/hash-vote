@@ -5,12 +5,10 @@ A console-based interface for the proof-of-work voting system.
 """
 
 import hashlib
-import os
-import sys
 from datetime import datetime, timezone
-from typing import Optional, Dict, Any
+from typing import Dict
 
-from sqlmodel import Session, select
+from sqlmodel import select
 from rich.console import Console
 from rich.panel import Panel
 from rich.text import Text
@@ -26,8 +24,6 @@ from rich.progress import (
 from rich.prompt import Prompt
 from rich.align import Align
 from rich import box
-from rich.layout import Layout
-from rich.rule import Rule
 
 from .models import Block
 from .database import create_db_and_tables, get_session_direct
@@ -76,7 +72,9 @@ class HashVoteCLI:
 
     def display_menu(self):
         """Display main menu options."""
-        menu_table = Table(show_header=False, box=box.SIMPLE_HEAD, border_style="blue")
+        menu_table = Table(
+            show_header=False, box=box.SIMPLE_HEAD, border_style="blue"
+        )
         menu_table.add_column("番号", style="cyan bold", width=4)
         menu_table.add_column("アイコン", width=4)
         menu_table.add_column("メニュー項目", style="white")
@@ -290,21 +288,29 @@ class HashVoteCLI:
             choice_counts[block.choice] = choice_counts.get(block.choice, 0) + 1
 
         # Create results table
-        results_table = Table(title=f"🗳️ 投票結果 (投票ID: {poll_id})", box=box.ROUNDED)
+        results_table = Table(
+            title=f"🗳️ 投票結果 (投票ID: {poll_id})", box=box.ROUNDED
+        )
         results_table.add_column("選択肢", style="cyan bold", width=20)
-        results_table.add_column("得票数", style="magenta", justify="right")
+        results_table.add_column(
+            "得票数", style="magenta", justify="right"
+        )
         results_table.add_column("割合", style="green", justify="right")
         results_table.add_column("グラフ", style="blue")
 
         # Sort by vote count (descending)
-        sorted_choices = sorted(choice_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_choices = sorted(
+            choice_counts.items(), key=lambda x: x[1], reverse=True
+        )
 
         for choice, count in sorted_choices:
             percentage = (count / len(blocks)) * 100
-            bar_length = int(percentage / 5)  # Scale bar to fit in console
+            bar_length = int(percentage / 5)  # Scale bar to fit
             bar = "█" * bar_length + "░" * (20 - bar_length)
 
-            results_table.add_row(choice, f"{count}票", f"{percentage:.1f}%", bar)
+            results_table.add_row(
+                choice, f"{count}票", f"{percentage:.1f}%", bar
+            )
 
         # Summary info
         summary_panel = Panel(
@@ -328,7 +334,9 @@ class HashVoteCLI:
             return
 
         # Get all blocks in order
-        statement = select(Block).where(Block.poll_id == poll_id).order_by(Block.id)
+        statement = select(Block).where(Block.poll_id == poll_id).order_by(
+            Block.id
+        )
         blocks = self.session.exec(statement).all()
 
         if not blocks:
@@ -719,12 +727,12 @@ class HashVoteCLI:
     def _display_voter_behavior_stats(self, sql_manager):
         """Display voter behavior statistics."""
         query = """
-        SELECT 
+        SELECT
             COUNT(DISTINCT poll_id) as polls_participated,
             COUNT(*) as voter_count
         FROM (
             SELECT voter_hash, COUNT(DISTINCT poll_id) as polls_per_voter
-            FROM blocks 
+            FROM blocks
             GROUP BY voter_hash
         ) subq
         GROUP BY polls_participated
