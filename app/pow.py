@@ -37,9 +37,7 @@ def hash_block(
     timestamp_str = timestamp.isoformat()
 
     # Concatenate all fields in a specific order
-    block_data = (
-        f"{poll_id}{voter_hash}{choice}{timestamp_str}{prev_hash}{nonce}"
-    )
+    block_data = f"{poll_id}{voter_hash}{choice}{timestamp_str}{prev_hash}{nonce}"
 
     # Compute SHA-256 hash
     return hashlib.sha256(block_data.encode("utf-8")).hexdigest()
@@ -129,7 +127,12 @@ def verify_pow(
     """
     # Compute hash with the given nonce
     block_hash = hash_block(
-        poll_id, voter_hash, choice, timestamp, prev_hash, nonce
+        poll_id,
+        voter_hash,
+        choice,
+        timestamp,
+        prev_hash,
+        nonce,
     )
 
     # Convert to integer and check against target

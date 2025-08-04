@@ -4,7 +4,10 @@ Unit tests for proof-of-work functionality.
 
 from datetime import datetime
 from app.pow import (
-    hash_block, compute_nonce, verify_pow, get_difficulty_target
+    hash_block,
+    compute_nonce,
+    verify_pow,
+    get_difficulty_target,
 )
 
 
@@ -16,10 +19,20 @@ class TestHashBlock:
         timestamp = datetime(2024, 1, 1, 12, 0, 0)
 
         hash1 = hash_block(
-            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 42
+            "poll1",
+            "voter123",
+            "choice_a",
+            timestamp,
+            "prev_hash",
+            42,
         )
         hash2 = hash_block(
-            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 42
+            "poll1",
+            "voter123",
+            "choice_a",
+            timestamp,
+            "prev_hash",
+            42,
         )
 
         assert hash1 == hash2
@@ -30,13 +43,28 @@ class TestHashBlock:
         timestamp = datetime(2024, 1, 1, 12, 0, 0)
 
         hash1 = hash_block(
-            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 42
+            "poll1",
+            "voter123",
+            "choice_a",
+            timestamp,
+            "prev_hash",
+            42,
         )
         hash2 = hash_block(
-            "poll1", "voter123", "choice_b", timestamp, "prev_hash", 42
+            "poll1",
+            "voter123",
+            "choice_b",
+            timestamp,
+            "prev_hash",
+            42,
         )
         hash3 = hash_block(
-            "poll1", "voter123", "choice_a", timestamp, "prev_hash", 43
+            "poll1",
+            "voter123",
+            "choice_a",
+            timestamp,
+            "prev_hash",
+            43,
         )
 
         assert hash1 != hash2

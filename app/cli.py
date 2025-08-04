@@ -73,7 +73,9 @@ class HashVoteCLI:
     def display_menu(self):
         """Display main menu options."""
         menu_table = Table(
-            show_header=False, box=box.SIMPLE_HEAD, border_style="blue"
+            show_header=False,
+            box=box.SIMPLE_HEAD,
+            border_style="blue",
         )
         menu_table.add_column("番号", style="cyan bold", width=4)
         menu_table.add_column("アイコン", width=4)
@@ -285,24 +287,23 @@ class HashVoteCLI:
         # Count votes by choice
         choice_counts: Dict[str, int] = {}
         for block in blocks:
-            choice_counts[block.choice] = (
-                choice_counts.get(block.choice, 0) + 1
-            )
+            choice_counts[block.choice] = choice_counts.get(block.choice, 0) + 1
 
         # Create results table
         results_table = Table(
-            title=f"🗳️ 投票結果 (投票ID: {poll_id})", box=box.ROUNDED
+            title=f"🗳️ 投票結果 (投票ID: {poll_id})",
+            box=box.ROUNDED,
         )
         results_table.add_column("選択肢", style="cyan bold", width=20)
-        results_table.add_column(
-            "得票数", style="magenta", justify="right"
-        )
+        results_table.add_column("得票数", style="magenta", justify="right")
         results_table.add_column("割合", style="green", justify="right")
         results_table.add_column("グラフ", style="blue")
 
         # Sort by vote count (descending)
         sorted_choices = sorted(
-            choice_counts.items(), key=lambda x: x[1], reverse=True
+            choice_counts.items(),
+            key=lambda x: x[1],
+            reverse=True,
         )
 
         for choice, count in sorted_choices:
@@ -311,7 +312,10 @@ class HashVoteCLI:
             bar = "█" * bar_length + "░" * (20 - bar_length)
 
             results_table.add_row(
-                choice, f"{count}票", f"{percentage:.1f}%", bar
+                choice,
+                f"{count}票",
+                f"{percentage:.1f}%",
+                bar,
             )
 
         # Summary info
@@ -337,9 +341,7 @@ class HashVoteCLI:
             return
 
         # Get all blocks in order
-        statement = select(Block).where(Block.poll_id == poll_id).order_by(
-            Block.id
-        )
+        statement = select(Block).where(Block.poll_id == poll_id).order_by(Block.id)
         blocks = self.session.exec(statement).all()
 
         if not blocks:
@@ -553,10 +555,11 @@ class HashVoteCLI:
                 "最多投票ID", f"{top_poll['poll_id']} ({top_poll['vote_count']} 票)"
             )
 
-        if ("latest_vote" in stats and stats["latest_vote"]):
+        if "latest_vote" in stats and stats["latest_vote"]:
             latest = stats["latest_vote"]
             stats_table.add_row(
-                "最新投票", f"{latest['poll_id']} - {latest['choice']}"
+                "最新投票",
+                f"{latest['poll_id']} - {latest['choice']}",
             )
 
         self.console.print(stats_table)

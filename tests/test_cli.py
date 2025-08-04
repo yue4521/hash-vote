@@ -39,14 +39,10 @@ class TestHashVoteCLI:
 
     def test_initialization(self):
         """Test CLI initialization."""
-        with patch("app.cli.create_db_and_tables"), patch(
-            "app.cli.get_session_direct"
-        ):
+        with patch("app.cli.create_db_and_tables"), patch("app.cli.get_session_direct"):
             app = HashVoteCLI()
             # Mock may return None
-            assert (
-                app.session is not None or app.session is None
-            )
+            assert app.session is not None or app.session is None
             # Rich console should be initialized
             assert hasattr(app, "console")
 

@@ -18,7 +18,11 @@ class Block(SQLModel, table=True):
 
     __tablename__ = "blocks"
     __table_args__ = (
-        UniqueConstraint("poll_id", "voter_hash", name="unique_vote"),
+        UniqueConstraint(
+            "poll_id",
+            "voter_hash",
+            name="unique_vote",
+        ),
     )
 
     id: Optional[int] = Field(default=None, primary_key=True)

@@ -41,7 +41,9 @@ class SQLManager:
         return conn
 
     def execute_query(
-        self, query: str, params: tuple = None
+        self,
+        query: str,
+        params: tuple = None,
     ) -> List[Dict[str, Any]]:
         """SQLクエリを実行して結果を返す
 
@@ -61,8 +63,7 @@ class SQLManager:
 
             # SELECTクエリまたはPRAGMAの場合は結果を返す
             query_upper = query.strip().upper()
-            if (query_upper.startswith("SELECT") or
-                    query_upper.startswith("PRAGMA")):
+            if query_upper.startswith("SELECT") or query_upper.startswith("PRAGMA"):
                 rows = cursor.fetchall()
                 return [dict(row) for row in rows]
             else:
@@ -181,11 +182,11 @@ class SQLManager:
 
         # ファイルサイズ
         stats["file_size_bytes"] = (
-            os.path.getsize(self.db_path)
-            if os.path.exists(self.db_path) else 0
+            os.path.getsize(self.db_path) if os.path.exists(self.db_path) else 0
         )
         stats["file_size_mb"] = round(
-            stats["file_size_bytes"] / (1024 * 1024), 2
+            stats["file_size_bytes"] / (1024 * 1024),
+            2,
         )
 
         # テーブル統計
@@ -288,14 +289,10 @@ class SQLManager:
         stats = {}
 
         # ベースクエリ
-        where_clause = (
-            f"WHERE poll_id = '{poll_id}'" if poll_id else ""
-        )
+        where_clause = f"WHERE poll_id = '{poll_id}'" if poll_id else ""
 
         # 総投票数
-        total_votes_query = (
-            f"SELECT COUNT(*) as total FROM blocks {where_clause}"
-        )
+        total_votes_query = f"SELECT COUNT(*) as total FROM blocks {where_clause}"
         total_result = self.execute_query(total_votes_query)
         stats["total_votes"] = total_result[0]["total"] if total_result else 0
 
