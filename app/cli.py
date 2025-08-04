@@ -285,7 +285,9 @@ class HashVoteCLI:
         # Count votes by choice
         choice_counts: Dict[str, int] = {}
         for block in blocks:
-            choice_counts[block.choice] = choice_counts.get(block.choice, 0) + 1
+            choice_counts[block.choice] = (
+                choice_counts.get(block.choice, 0) + 1
+            )
 
         # Create results table
         results_table = Table(
@@ -315,7 +317,8 @@ class HashVoteCLI:
         # Summary info
         summary_panel = Panel(
             f"📈 総投票数: [bold]{len(blocks)}[/bold]票\n"
-            f"🏆 最多得票: [bold]{sorted_choices[0][0]}[/bold] ({sorted_choices[0][1]}票)",
+            f"🏆 最多得票: [bold]{sorted_choices[0][0]}[/bold] "
+            f"({sorted_choices[0][1]}票)",
             title="統計情報",
             border_style="blue",
         )
@@ -550,9 +553,11 @@ class HashVoteCLI:
                 "最多投票ID", f"{top_poll['poll_id']} ({top_poll['vote_count']} 票)"
             )
 
-        if "latest_vote" in stats and stats["latest_vote"]:
+        if ("latest_vote" in stats and stats["latest_vote"]):
             latest = stats["latest_vote"]
-            stats_table.add_row("最新投票", f"{latest['poll_id']} - {latest['choice']}")
+            stats_table.add_row(
+                "最新投票", f"{latest['poll_id']} - {latest['choice']}"
+            )
 
         self.console.print(stats_table)
 
@@ -599,7 +604,8 @@ class HashVoteCLI:
 
                     if len(results) > 50:
                         self.console.print(
-                            f"[yellow]⚠️ 結果が50行を超えるため、最初の50行のみ表示しています。（全{len(results)}行）[/yellow]"
+                            f"[yellow]⚠️ 結果が50行を超えるため、最初の50行のみ表示"
+                            f"しています。（全{len(results)}行）[/yellow]"
                         )
                 else:
                     self.console.print(

@@ -37,7 +37,9 @@ def hash_block(
     timestamp_str = timestamp.isoformat()
 
     # Concatenate all fields in a specific order
-    block_data = f"{poll_id}{voter_hash}{choice}{timestamp_str}{prev_hash}{nonce}"
+    block_data = (
+        f"{poll_id}{voter_hash}{choice}{timestamp_str}{prev_hash}{nonce}"
+    )
 
     # Compute SHA-256 hash
     return hashlib.sha256(block_data.encode("utf-8")).hexdigest()
@@ -55,8 +57,10 @@ def compute_nonce(
     """
     Compute a nonce that satisfies the proof-of-work difficulty requirement.
 
-    The difficulty requires the hash to have at least `difficulty_bits` leading zeros.
-    For 18 bits, this means the first 18 bits (4.5 hex characters) must be zero.
+    The difficulty requires the hash to have at least `difficulty_bits`
+    leading zeros.
+    For 18 bits, this means the first 18 bits (4.5 hex characters)
+    must be zero.
 
     Args:
         poll_id: Identifier for the poll
@@ -120,10 +124,13 @@ def verify_pow(
         difficulty_bits: Required number of leading zero bits (default: 18)
 
     Returns:
-        True if the nonce produces a valid proof-of-work, False otherwise
+        True if the nonce produces a valid proof-of-work, False
+        otherwise
     """
     # Compute hash with the given nonce
-    block_hash = hash_block(poll_id, voter_hash, choice, timestamp, prev_hash, nonce)
+    block_hash = hash_block(
+        poll_id, voter_hash, choice, timestamp, prev_hash, nonce
+    )
 
     # Convert to integer and check against target
     hash_int = int(block_hash, 16)
