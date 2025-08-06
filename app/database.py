@@ -1,6 +1,7 @@
 """
 Database configuration and session management for HashVote.
 """
+
 from sqlmodel import SQLModel, create_engine, Session
 from typing import Generator
 
@@ -12,14 +13,16 @@ DATABASE_URL = "sqlite:///./hashvote.db"
 engine = create_engine(
     DATABASE_URL,
     echo=False,  # Set to True for SQL query logging during development
-    connect_args={"check_same_thread": False}  # Allow sharing connections between threads
+    connect_args={
+        "check_same_thread": False
+    },  # Allow sharing connections between threads
 )
 
 
 def create_db_and_tables():
     """
     Create the database and all tables.
-    
+
     This should be called when the application starts.
     """
     SQLModel.metadata.create_all(engine)
@@ -28,7 +31,7 @@ def create_db_and_tables():
 def get_session() -> Generator[Session, None, None]:
     """
     Dependency to get a database session.
-    
+
     Yields:
         Database session instance
     """
@@ -39,7 +42,7 @@ def get_session() -> Generator[Session, None, None]:
 def get_session_direct() -> Session:
     """
     Get a direct database session for CLI usage.
-    
+
     Returns:
         Database session instance
     """

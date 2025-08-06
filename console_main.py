@@ -10,13 +10,13 @@ import os
 # Add the project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from app.cli import main
+from app.cli import main  # noqa: E402
 
 if __name__ == "__main__":
     print("HashVote CLI Starting...")
     print("Pythonコンソール版HashVote投票システムを開始します。")
     print()
-    
+
     try:
         main()
     except KeyboardInterrupt:

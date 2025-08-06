@@ -1,0 +1,38 @@
+# .github/workflows/release.yml
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write   # バッジ更新用
+
+jobs:
+  update-badge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Update README badge
+        run: |
+          sed -i "s/version-[^-]*-green/version-${{ steps.version.outputs.VERSION }}-green/g" README.md
+      - name: Commit badge update
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout test/workflow || git checkout main || git checkout master
+          git add README.md
+          git commit -m "docs: READMEバージョンをv${{ steps.version.outputs.VERSION }}に更新
+
+          🤖 Generated with [Claude Code](https://claude.ai/code)
+
+          Co-Authored-By: Claude <noreply@anthropic.com>" || exit 0
+          git push origin test/workflow || git push origin main || git push origin master
+
