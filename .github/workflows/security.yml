@@ -1,0 +1,136 @@
+# .github/workflows/security.yml
+name: Security Checks
+
+on:
+  push:
+    branches: [main, test/workflow]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 9 * * 1'  # UTC 月曜 18:00 JST
+
+jobs:
+  vulnerability-scan:
+    name: 依存関係脆弱性スキャン
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pip-audit
+          
+      - name: Run pip-audit
+        run: |
+          pip-audit --format=json --output=audit-results.json
+          pip-audit --format=cyclonedx-json --output=sbom.json
+        continue-on-error: true
+        
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-results
+          path: |
+            audit-results.json
+            sbom.json
+        if: always()
+
+  bandit-security-check:
+    name: Banditセキュリティ解析
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install Bandit
+        run: pip install bandit[toml]
+        
+      - name: Create Bandit config
+        run: |
+          cat > .bandit << 'EOF'
+          [bandit]
+          exclude = /tests/,/venv/
+          skips = B101
+          EOF
+          
+      - name: Run Bandit
+        run: |
+          bandit -r . -f json -o bandit-report.json || true
+          bandit -r . -f txt
+        continue-on-error: true
+        
+      - name: Upload Bandit results
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
+        if: always()
+
+  secret-scan:
+    name: Secret検出スキャン
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Run TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  codeql-analysis:
+    name: CodeQL静的解析
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          queries: security-and-quality
+          
+      - uses: github/codeql-action/analyze@v3
+
+  security-summary:
+    name: セキュリティサマリー
+    runs-on: ubuntu-latest
+    needs: [vulnerability-scan, bandit-security-check, secret-scan]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: security-reports
+        continue-on-error: true
+        
+      - name: Generate security summary
+        run: |
+          echo "# セキュリティチェック結果 📋" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| チェック項目 | ステータス |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|-----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 依存関係脆弱性スキャン | ${{ needs.vulnerability-scan.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Banditセキュリティ解析 | ${{ needs.bandit-security-check.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret検出スキャン | ${{ needs.secret-scan.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "詳細な結果は各ジョブのログとアーティファクトを確認してください。" >> $GITHUB_STEP_SUMMARY
