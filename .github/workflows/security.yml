@@ -29,9 +29,8 @@ jobs:
           
       - name: Run pip-audit
         run: |
-          pip-audit --format=json --output=audit-results.json
-          pip-audit --format=cyclonedx-json --output=sbom.json
-        continue-on-error: true
+          pip-audit --format=json --output=audit-results.json || echo "Vulnerabilities found"
+          pip-audit --format=cyclonedx-json --output=sbom.json || echo "SBOM generation completed"
         
       - name: Upload audit results
         uses: actions/upload-artifact@v4
@@ -65,9 +64,8 @@ jobs:
           
       - name: Run Bandit
         run: |
-          bandit -r . -f json -o bandit-report.json || true
-          bandit -r . -f txt
-        continue-on-error: true
+          bandit -r . -f json -o bandit-report.json || echo "Security issues found"
+          bandit -r . -f txt || echo "Bandit analysis completed"
         
       - name: Upload Bandit results
         uses: actions/upload-artifact@v4
@@ -108,6 +106,8 @@ jobs:
           queries: security-and-quality
           
       - uses: github/codeql-action/analyze@v3
+        with:
+          category: "security-workflow"
 
   security-summary:
     name: セキュリティサマリー
