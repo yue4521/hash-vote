@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 3 * * 0'   # UTC 日曜 12:00 JST
+    - cron: '0 3 * * 0'   # JST 日曜 12:00 (UTC+9)
 
 jobs:
   test-and-lint:

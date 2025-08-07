@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 9 * * 1'  # UTC 月曜 18:00 JST
+    - cron: '0 9 * * 1'  # JST 月曜 18:00 (UTC+9)
 
 jobs:
   vulnerability-scan:
