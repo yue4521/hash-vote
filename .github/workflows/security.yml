@@ -2,9 +2,10 @@
 name: Security Checks
 
 on:
-  push:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]  # mainブランチへのpushのみ
   schedule:
     - cron: '0 0 * * 1'  # 毎週月曜日 09:00 JST (UTC 00:00)
 
