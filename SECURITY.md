@@ -6,8 +6,8 @@ We actively maintain and provide security updates for the following versions of 
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+| 1.0.x   | Yes                |
+| < 1.0   | No                 |
 
 ## Reporting a Vulnerability
 
@@ -77,17 +77,17 @@ When deploying HashVote in production:
 
 HashVote is designed to protect against:
 
-- ✅ Vote tampering after submission
-- ✅ Unauthorized vote modification
-- ✅ Double voting with same voter credentials
-- ✅ Historical vote alteration
+- Vote tampering after submission
+- Unauthorized vote modification
+- Double voting with same voter credentials
+- Historical vote alteration
 
 HashVote does NOT protect against:
 
-- ❌ Sybil attacks (requires external identity verification)
-- ❌ Coercion or vote buying (inherent to digital voting)
-- ❌ Denial of service attacks
-- ❌ Compromise of the server infrastructure
+- Sybil attacks (requires external identity verification)
+- Coercion or vote buying (inherent to digital voting)
+- Denial of service attacks
+- Compromise of the server infrastructure
 
 ## Vulnerability Disclosure Policy
 

@@ -1,10 +1,12 @@
 # .github/workflows/ci.yml
 name: CI
+
 on:
   push:
   pull_request:
+    branches: [main]
   schedule:
-    - cron: '0 3 * * 0'   # UTC 日曜 12:00 JST
+    - cron: '0 0 * * 1'  # 毎週月曜日 09:00 JST (UTC 00:00)
 
 jobs:
   test-and-lint:
@@ -20,7 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: コードフォーマットチェック
-        run: black --check .
+        run: black --check . --exclude="pyproject\.toml"
       - name: Lintチェック
         run: flake8 .
       - name: テスト実行とカバレッジ取得
