@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+    branches: [main]
   schedule:
     - cron: '0 3 * * 0'   # JST 日曜 12:00 (UTC+9)
 

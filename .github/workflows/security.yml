@@ -3,7 +3,6 @@ name: Security Checks
 
 on:
   push:
-    branches: [main, test/workflow]
   pull_request:
     branches: [main]
   schedule:
