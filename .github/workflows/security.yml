@@ -9,6 +9,11 @@ on:
   schedule:
     - cron: '0 9 * * 1'  # JST 月曜 18:00 (UTC+9)
 
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
   vulnerability-scan:
     name: 依存関係脆弱性スキャン
@@ -174,10 +179,6 @@ jobs:
       results-file-name: osv-results.json
       upload-sarif: false
       fail-on-vuln: false
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
 
   security-summary:
     name: セキュリティサマリー
