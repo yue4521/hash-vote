@@ -171,7 +171,7 @@ jobs:
 
   osv-scanner:
     name: OSV脆弱性スキャン
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.0
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-unified-workflow.yml@v2.2.0
 
   security-summary:
     name: セキュリティサマリー
