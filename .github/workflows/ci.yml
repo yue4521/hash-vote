@@ -20,7 +20,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: コードフォーマットチェック
-        run: black --check .
+        run: black --check . --exclude="pyproject\.toml"
       - name: Lintチェック
         run: flake8 .
       - name: テスト実行とカバレッジ取得
