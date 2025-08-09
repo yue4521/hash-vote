@@ -1,11 +1,12 @@
 # .github/workflows/ci.yml
 name: CI
+
 on:
   push:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 9 * * 1'  # 毎週月曜日 18:00 JST (UTC 09:00)
+    - cron: '0 0 * * 1'  # 毎週月曜日 09:00 JST (UTC 00:00)
 
 jobs:
   test-and-lint:
