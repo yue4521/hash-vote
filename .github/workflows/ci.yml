@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 3 * * 0'   # JST 日曜 12:00 (UTC+9)
+    - cron: '0 9 * * 1'  # 毎週月曜日 18:00 JST (UTC 09:00)
 
 jobs:
   test-and-lint:
