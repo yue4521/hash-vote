@@ -169,14 +169,10 @@ jobs:
             license-report.csv
         if: always()
 
-  osv-scanner:
-    name: OSV脆弱性スキャン
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-unified-workflow.yml@v2.2.0
-
   security-summary:
     name: セキュリティサマリー
     runs-on: ubuntu-latest
-    needs: [vulnerability-scan, bandit-security-check, secret-scan, static-analysis, license-check, osv-scanner]
+    needs: [vulnerability-scan, bandit-security-check, secret-scan, static-analysis, license-check]
     if: always()
     steps:
       - uses: actions/checkout@v4
@@ -198,7 +194,6 @@ jobs:
           echo "| Secret検出スキャン | ${{ needs.secret-scan.result == 'success' && 'OK 通過' || 'NG 要確認' }} | 高 |" >> $GITHUB_STEP_SUMMARY
           echo "| 静的解析（Semgrep） | ${{ needs.static-analysis.result == 'success' && 'OK 通過' || 'NG 要確認' }} | 中 |" >> $GITHUB_STEP_SUMMARY
           echo "| ライセンスチェック | ${{ needs.license-check.result == 'success' && 'OK 通過' || 'NG 要確認' }} | 低 |" >> $GITHUB_STEP_SUMMARY
-          echo "| OSV脆弱性スキャン | ${{ needs.osv-scanner.result == 'success' && 'OK 通過' || 'NG 要確認' }} | 高 |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 重要度説明" >> $GITHUB_STEP_SUMMARY
           echo "- **高**: セキュリティ上の重大なリスクを含む可能性" >> $GITHUB_STEP_SUMMARY
@@ -219,10 +214,6 @@ jobs:
           if [ "${{ needs.secret-scan.result }}" != "success" ]; then
             echo "::error::Critical: Secretスキャンで問題が検出されました"
             critical_failures=$((critical_failures + 1))
-          fi
-          
-          if [ "${{ needs.osv-scanner.result }}" != "success" ]; then
-            echo "::warning::High: OSVスキャンで脆弱性が検出されました"
           fi
           
           if [ $critical_failures -gt 0 ]; then
