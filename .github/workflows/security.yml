@@ -127,13 +127,13 @@ jobs:
         
       - name: Generate security summary
         run: |
-          echo "# セキュリティチェック結果 📋" >> $GITHUB_STEP_SUMMARY
+          echo "# セキュリティチェック結果" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| チェック項目 | ステータス |" >> $GITHUB_STEP_SUMMARY
           echo "|-------------|-----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 依存関係脆弱性スキャン | ${{ needs.vulnerability-scan.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Banditセキュリティ解析 | ${{ needs.bandit-security-check.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Secret検出スキャン | ${{ needs.secret-scan.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 静的解析（Semgrep） | ${{ needs.static-analysis.result == 'success' && '✅ 通過' || '⚠️ 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 依存関係脆弱性スキャン | ${{ needs.vulnerability-scan.result == 'success' && 'OK 通過' || 'NG 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Banditセキュリティ解析 | ${{ needs.bandit-security-check.result == 'success' && 'OK 通過' || 'NG 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret検出スキャン | ${{ needs.secret-scan.result == 'success' && 'OK 通過' || 'NG 要確認' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 静的解析（Semgrep） | ${{ needs.static-analysis.result == 'success' && 'OK 通過' || 'NG 要確認' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "詳細な結果は各ジョブのログとアーティファクトを確認してください。" >> $GITHUB_STEP_SUMMARY
