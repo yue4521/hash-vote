@@ -166,26 +166,18 @@ jobs:
 
   osv-scanner:
     name: OSV脆弱性スキャン
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Run OSV Scanner
-        uses: google/osv-scanner-action@v2.1.0
-        with:
-          scan-args: |-
-            --recursive
-            --format=json
-            --output=osv-results.json
-            ./
-        continue-on-error: true
-        
-      - name: Upload OSV results
-        uses: actions/upload-artifact@v4
-        with:
-          name: osv-scan-results
-          path: osv-results.json
-        if: always()
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.0
+    with:
+      scan-args: |-
+        --recursive
+        ./
+      results-file-name: osv-results.json
+      upload-sarif: false
+      fail-on-vuln: false
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
   security-summary:
     name: セキュリティサマリー

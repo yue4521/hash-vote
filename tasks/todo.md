@@ -3,14 +3,14 @@
 ## 発見された新しい問題
 
 ### OSV Scanner Action エラー (2025-08-09)
-- **問題**: `google/osv-scanner-action@v1.8.5` の action.yml ファイルが不正
-- **エラーメッセージ**: "Top level 'runs:' section is required for google/osv-scanner-action/v1.8.5/action.yml"
+- **問題**: `google/osv-scanner-action@v2.1.0` の action.yml ファイルが不正
+- **エラーメッセージ**: "Top level 'runs:' section is required for google/osv-scanner-action/v2.1.0/action.yml"
 - **場所**: security.yml の osv-scanner ジョブ（174行目）
 - **影響**: OSV脆弱性スキャンジョブが完全に失敗
 - **調査結果**: 
-  - v1.8.5 は不正な action.yml を持つ
-  - 最新安定版は v2.1.0 (2024-07-14リリース)
-  - 推奨される新しい設定方法あり
+  - v2.1.0 でも action.yml の構造に問題がある
+  - 公式推奨は再利用可能ワークフロー `google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.0` の使用
+  - 直接アクションを呼び出す方法は非推奨となった
 
 ## 以前に修正済みの問題
 
@@ -26,9 +26,11 @@
 
 ## 修正が必要なタスク
 
-### 🔧 OSV Scanner Action 修正 (緊急)
-- **対応**: `google/osv-scanner-action@v1.8.5` を v2.1.0 に更新
-- **設定変更**: 新しい推奨設定方法に従って scan-args を調整
+### 🔧 OSV Scanner Action 修正 (緊急) - 🔄 進行中
+- **対応**: 再利用可能ワークフロー `google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.0` に変更
+- **設定変更**: 直接アクション呼び出しから `uses` で再利用可能ワークフローを呼び出すに変更
+- **scan-args調整**: 新しい形式で `--recursive --format=json --output=osv-results.json ./` を指定
+- **権限追加**: 必要な permissions を追加（security-events: write など）
 - **テスト**: 修正後のワークフロー実行確認
 
 ## 以前に実施した修正
