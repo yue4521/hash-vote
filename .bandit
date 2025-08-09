@@ -1,0 +1,30 @@
+[bandit]
+# Bandit設定ファイル
+exclude = /tests/,/venv/,/build/,/dist/,/__pycache__/,*.pyc
+
+# スキップするルール
+skips = B101  # assert_used - テストでのassertは許可
+
+# 重要度レベル（low, medium, high）
+confidence = medium
+severity = medium
+
+# 追加の除外パターン
+exclude_dirs = [
+    "/tests/",
+    "/venv/", 
+    "/build/",
+    "/dist/",
+    "/.git/",
+    "/__pycache__/"
+]
+
+# カスタムテストプラグイン（必要に応じてコメントアウト解除）
+# tests = B601,B602,B603,B604,B605,B606,B607,B608,B609,B610,B611
+
+# レポート形式
+format = json
+output = bandit-report.json
+
+# 詳細レポート
+verbose = true

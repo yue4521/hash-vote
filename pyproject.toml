@@ -52,3 +52,57 @@ classifiers = [
 [tool.setuptools.packages.find]
 include = ["app*"]
 exclude = ["tests*", "sql*"]
+
+# セキュリティツール設定
+[tool.bandit]
+exclude_dirs = ["/tests/", "/venv/", "/build/", "/dist/"]
+skips = ["B101"]  # assert_used - テストでのassertは許可
+severity = "medium"
+
+[tool.bandit.blacklist_calls]
+bad_name_sets = [
+    {
+        names = ["pickle", "cpickle", "dill"],
+        message = "Pickle modules are insecure for untrusted data"
+    }
+]
+
+[tool.semgrep]
+config = ["auto", "p/security-audit", "p/python"]
+exclude = [
+    "tests/",
+    "venv/",
+    "*.pyc",
+    "__pycache__/",
+]
+severity = ["ERROR", "WARNING"]
+
+[tool.pip-audit]
+# 脆弱性の重要度設定
+desc = true
+format = "json"
+output = "audit-results.json"
+vulnerability-service = "pypi"
+
+[tool.safety]
+full_report = true
+output = "json"
+ignore = []  # 無視するCVE IDがあればここに追加
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "setup.py",
+    "console_main.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
