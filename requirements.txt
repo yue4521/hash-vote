@@ -1,7 +1,7 @@
 sqlmodel==0.0.24
-pytest==8.4.1
+pytest==8.4.2
 pytest-asyncio==1.1.0
-pytest-cov==6.2.1
+pytest-cov==6.3.0
 rich==14.1.0
 colorama==0.4.6
 black==25.1.0
