@@ -34,7 +34,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hash-vote"
-version = "1.3.0"
+version = "1.3.3"
 description = "Proof-of-Work voting system using blockchain technology"
 readme = "README.md"
 license = {text = "MIT"}
