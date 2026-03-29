@@ -25,7 +25,7 @@ from rich.prompt import Prompt
 from rich.align import Align
 from rich import box
 
-from .models import Block
+from .models import Block, PollOption
 from .database import create_db_and_tables, get_session_direct
 from .pow import compute_nonce, verify_pow, hash_block, get_difficulty_target
 from .sql_functions import get_sql_manager
@@ -82,12 +82,13 @@ class HashVoteCLI:
         menu_table.add_column("メニュー項目", style="white")
 
         menu_items = [
-            ("1", "🗳️", "投票する"),
-            ("2", "📊", "投票結果を確認する"),
-            ("3", "🔍", "監査ログを確認する"),
-            ("4", "🗄️", "データベース管理"),
-            ("5", "💚", "ヘルスチェック"),
-            ("6", "👋", "終了"),
+            ("1", "📝", "投票を作成する"),
+            ("2", "🗳️", "投票する"),
+            ("3", "📊", "投票結果を確認する"),
+            ("4", "🔍", "監査ログを確認する"),
+            ("5", "🗄️", "データベース管理"),
+            ("6", "💚", "ヘルスチェック"),
+            ("7", "👋", "終了"),
         ]
 
         for num, icon, desc in menu_items:
@@ -130,6 +131,55 @@ class HashVoteCLI:
         existing_vote = self.session.exec(statement).first()
         return existing_vote is not None
 
+    def handle_create_poll(self):
+        """Handle poll creation with predefined options."""
+        self.console.rule("[bold cyan]📝 投票作成[/bold cyan]")
+
+        self.console.print()
+        poll_id = self.get_user_input("投票ID")
+        if not poll_id:
+            self.console.print("[red]❌ エラー: 投票IDが必要です[/red]")
+            return
+
+        # Check if options already exist
+        statement = select(PollOption).where(PollOption.poll_id == poll_id)
+        existing = self.session.exec(statement).all()
+        if existing:
+            self.console.print(
+                f"[red]❌ エラー: 投票ID '{poll_id}' はすでに登録済みです[/red]"
+            )
+            return
+
+        self.console.print("[cyan]選択肢を入力してください（空行で終了）:[/cyan]")
+        options = []
+        while True:
+            line = input("> ").strip()
+            if not line:
+                break
+            options.append(line)
+
+        if not options:
+            self.console.print("[red]❌ エラー: 選択肢が1つ以上必要です[/red]")
+            return
+
+        try:
+            for option_text in options:
+                option = PollOption(poll_id=poll_id, option_text=option_text)
+                self.session.add(option)
+            self.session.commit()
+
+            options_table = Table(title=f"📝 投票作成完了 (ID: {poll_id})", box=box.ROUNDED)
+            options_table.add_column("番号", style="cyan bold", width=6)
+            options_table.add_column("選択肢", style="white")
+            for i, opt in enumerate(options, 1):
+                options_table.add_row(str(i), opt)
+
+            self.console.print(options_table)
+
+        except Exception as e:
+            self.session.rollback()
+            self.console.print(f"[red]❌ エラー: 投票の作成に失敗しました: {str(e)}[/red]")
+
     def handle_vote(self):
         """Handle voting process."""
         self.console.rule("[bold cyan]🗳️ 投票[/bold cyan]")
@@ -141,10 +191,28 @@ class HashVoteCLI:
             self.console.print("[red]❌ エラー: 投票IDが必要です[/red]")
             return
 
-        choice = self.get_user_input("選択肢")
-        if not choice:
-            self.console.print("[red]❌ エラー: 選択肢が必要です[/red]")
+        # Fetch predefined options
+        statement = select(PollOption).where(PollOption.poll_id == poll_id)
+        poll_options = self.session.exec(statement).all()
+        if not poll_options:
+            self.console.print(
+                f"[red]❌ エラー: 投票ID '{poll_id}' の選択肢が登録されていません[/red]"
+            )
             return
+
+        # Display options
+        options_table = Table(title=f"🗳️ 選択肢 (ID: {poll_id})", box=box.ROUNDED)
+        options_table.add_column("番号", style="cyan bold", width=6)
+        options_table.add_column("選択肢", style="white")
+        for i, opt in enumerate(poll_options, 1):
+            options_table.add_row(str(i), opt.option_text)
+        self.console.print(options_table)
+
+        selection = self.get_user_input(f"番号を選択してください (1-{len(poll_options)})")
+        if not selection.isdigit() or not (1 <= int(selection) <= len(poll_options)):
+            self.console.print("[red]❌ エラー: 有効な番号を入力してください[/red]")
+            return
+        choice = poll_options[int(selection) - 1].option_text
 
         voter_id = self.get_user_input("投票者ID")
         if not voter_id:
@@ -793,19 +861,21 @@ class HashVoteCLI:
                 self.display_header()
                 self.display_menu()
 
-                choice = self.get_user_input("選択してください (1-6)")
+                choice = self.get_user_input("選択してください (1-7)")
 
                 if choice == "1":
-                    self.handle_vote()
+                    self.handle_create_poll()
                 elif choice == "2":
-                    self.handle_poll_result()
+                    self.handle_vote()
                 elif choice == "3":
-                    self.handle_audit_log()
+                    self.handle_poll_result()
                 elif choice == "4":
-                    self.handle_database_management()
+                    self.handle_audit_log()
                 elif choice == "5":
-                    self.handle_health_check()
+                    self.handle_database_management()
                 elif choice == "6":
+                    self.handle_health_check()
+                elif choice == "7":
                     goodbye_panel = Panel(
                         "[bold cyan]👋 HashVoteを終了します。ありがとうございました![/bold cyan]",
                         border_style="cyan",
@@ -814,10 +884,10 @@ class HashVoteCLI:
                     break
                 else:
                     self.console.print(
-                        "[red]❌ 無効な選択です。1-6の数字を入力してください。[/red]"
+                        "[red]❌ 無効な選択です。1-7の数字を入力してください。[/red]"
                     )
 
-                if choice != "6":
+                if choice != "7":
                     self.console.print("\n[dim]Enterキーを押して続行...[/dim]")
                     input()
 

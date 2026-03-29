@@ -7,6 +7,18 @@ from datetime import datetime
 from sqlmodel import SQLModel, Field, UniqueConstraint
 
 
+class PollOption(SQLModel, table=True):
+    """
+    Represents a predefined option for a poll.
+    """
+
+    __tablename__ = "poll_options"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    poll_id: str = Field(index=True)
+    option_text: str = Field()
+
+
 class Block(SQLModel, table=True):
     """
     Represents a single vote block in the blockchain.

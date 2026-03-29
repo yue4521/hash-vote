@@ -9,7 +9,7 @@ from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
 from app.cli import HashVoteCLI
-from app.models import Block
+from app.models import Block, PollOption
 
 
 # Create test database
@@ -157,11 +157,11 @@ class TestCLIVoteHandling:
     @patch("rich.prompt.Prompt.ask")
     @patch("rich.console.Console.print")
     @patch("rich.console.Console.rule")
-    def test_handle_vote_missing_choice(
+    def test_handle_vote_no_options_registered(
         self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI
     ):
-        """Test vote handling with missing choice."""
-        mock_ask.side_effect = ["test_poll", "", "voter1"]  # Empty choice
+        """Test vote handling when no options are registered for poll."""
+        mock_ask.side_effect = ["test_poll"]  # poll_id only, no options in DB
 
         cli_app.handle_vote()
 
@@ -169,18 +169,24 @@ class TestCLIVoteHandling:
         error_calls = [
             call
             for call in mock_print.call_args_list
-            if any("エラー: 選択肢が必要です" in str(arg) for arg in call[0])
+            if any("選択肢が登録されていません" in str(arg) for arg in call[0])
         ]
         assert len(error_calls) > 0
 
+    @patch("builtins.input", return_value="")
     @patch("rich.prompt.Prompt.ask")
     @patch("rich.console.Console.print")
     @patch("rich.console.Console.rule")
     def test_handle_vote_missing_voter_id(
-        self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI
+        self, mock_rule, mock_print, mock_ask, mock_input, cli_app: HashVoteCLI
     ):
         """Test vote handling with missing voter ID."""
-        mock_ask.side_effect = ["test_poll", "option_a", ""]  # Empty voter_id
+        # Pre-register poll options
+        option = PollOption(poll_id="test_poll", option_text="option_a")
+        cli_app.session.add(option)
+        cli_app.session.commit()
+
+        mock_ask.side_effect = ["test_poll", "1", ""]  # poll_id, selection, empty voter_id
 
         cli_app.handle_vote()
 
@@ -192,17 +198,23 @@ class TestCLIVoteHandling:
         ]
         assert len(error_calls) > 0
 
+    @patch("builtins.input", return_value="")
     @patch("rich.prompt.Prompt.ask")
     @patch("rich.console.Console.print")
     @patch("rich.console.Console.rule")
     def test_handle_vote_duplicate(
-        self, mock_rule, mock_print, mock_ask, cli_app: HashVoteCLI
+        self, mock_rule, mock_print, mock_ask, mock_input, cli_app: HashVoteCLI
     ):
         """Test vote handling with duplicate voter."""
-        # Add existing vote
-        timestamp = datetime.now(timezone.utc)
         import hashlib
 
+        # Pre-register poll option
+        option = PollOption(poll_id="test_poll", option_text="option_a")
+        cli_app.session.add(option)
+        cli_app.session.commit()
+
+        # Add existing vote
+        timestamp = datetime.now(timezone.utc)
         voter_hash = hashlib.sha256("voter1".encode("utf-8")).hexdigest()
 
         block = Block(
@@ -217,7 +229,7 @@ class TestCLIVoteHandling:
         cli_app.session.add(block)
         cli_app.session.commit()
 
-        mock_ask.side_effect = ["test_poll", "option_b", "voter1"]
+        mock_ask.side_effect = ["test_poll", "1", "voter1"]  # poll_id, selection, voter_id
 
         cli_app.handle_vote()
 

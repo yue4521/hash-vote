@@ -107,6 +107,17 @@ class SQLManager:
         init_sql = """
         -- 既存テーブルを削除
         DROP TABLE IF EXISTS blocks;
+        DROP TABLE IF EXISTS poll_options;
+
+        -- poll_optionsテーブルを作成
+        CREATE TABLE poll_options (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            poll_id VARCHAR NOT NULL,
+            option_text VARCHAR NOT NULL
+        );
+
+        -- インデックス作成
+        CREATE INDEX ix_poll_options_poll_id ON poll_options (poll_id);
 
         -- blocksテーブルを作成
         CREATE TABLE blocks (
