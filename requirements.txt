@@ -2,7 +2,7 @@ sqlmodel==0.0.34
 pytest==8.4.2
 pytest-asyncio==1.2.0
 pytest-cov==7.1.0
-rich==14.3.3
+rich==15.0.0
 colorama==0.4.6
 black==25.11.0
 flake8==7.3.0
